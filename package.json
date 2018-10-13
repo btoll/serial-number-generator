@@ -2,7 +2,9 @@
   "name": "serial-generator",
   "version": "0.1.0",
   "private": true,
+  "author": "Benjamin Toll <benjam72@yahoo.com> (http://www.benjamintoll.com)",
   "scripts": {
+    "flow": "flow",
     "start": "make serve"
   },
   "dependencies": {

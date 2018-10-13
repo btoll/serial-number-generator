@@ -12,17 +12,22 @@ module.exports = app => {
         res.send(mockGetAll);
         next();
     });
+    */
 
+    /*
     app.get('/api/scenario/:id', (req, res, next) => {
         res.send(Object.assign({}, mockGetOne(req.params.id)));
         next();
     });
+    */
 
-    app.post('/api/scenario/:scenarioName/:scenarioDescription/:monthEnd', (req, res, next) => {
-        res.send(Object.assign({}, mockGetOne("f72a2e67-8d3b-429c-a630-19d75e01ae80")));
+    app.post('/create-experiment/:id', (req, res, next) => {
+        debugger;
+//        res.send(Object.assign({}, mockGetOne("f72a2e67-8d3b-429c-a630-19d75e01ae80")));
         next();
     });
 
+    /*
     app.put('/api/scenario/:scenarioId', (req, res, next) => {
         res.send(Object.assign({}, mockGetOne(req.params.scenarioId)));
         next();

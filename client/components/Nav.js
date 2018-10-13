@@ -12,13 +12,13 @@ export default function Nav() {
                     </NavLink>
                 </li>
                 <li>
-                    <NavLink activeClassName='active' to='/create-experiment'>
-                        Create Experiment
+                    <NavLink activeClassName='active' to='/list-experiments'>
+                        List Experiments
                     </NavLink>
                 </li>
                 <li>
-                    <NavLink activeClassName='active' to='/list-experiments'>
-                        List Experiments
+                    <NavLink activeClassName='active' to='/create-experiment'>
+                        Create Experiment
                     </NavLink>
                 </li>
                 <li>

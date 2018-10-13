@@ -3,7 +3,7 @@ body {
     padding: 0;
     font-family: sans-serif;
 }
-/**********************************************************/
+/********************************* Nav **************************************/
 nav {
     background: #337ab7;
     position: fixed;
@@ -32,8 +32,25 @@ nav li a {
 nav a.active {
     background: #265a88;
 }
-/**********************************************************/
+/********************************* Section **************************************/
 section {
     margin: 80px 40px 0;
+}
+/********************************* Form **************************************/
+form legend {
+    background: antiquewhite;
+    border: 1px solid #000;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+}
+form div {
+    margin: 15px;
+}
+form label {
+    display: inline-block;
+    font-weight: bold;
+    width: 120px;
 }
 
