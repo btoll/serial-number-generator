@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 
 export default class Home extends React.Component {
@@ -10,7 +11,9 @@ export default class Home extends React.Component {
 
     render() {
         return (
-            <div>Welcome Ben!</div>
+            <section>
+                <div>Welcome Ben!</div>
+            </section>
         );
     }
 }

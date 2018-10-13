@@ -1,27 +1,44 @@
 // @flow
 import React from 'react';
-//import Error from './Error';
+import Error from './Error';
 import axios from 'axios';
-//import {
-//    PRODUCTS_URL,
-//    RECEIPTS_URL,
-//    STORES_URL,
-//    incr
-//} from '../config';
+import { LOGIN_URL } from './config';
 
-export default class CreateExperiment extends React.Component {
-    constructor() {
-        super();
+type Props = {
+    onLogIn: Function;
+};
+
+type State = {
+    username: string,
+    password: string,
+    errors: Array<string>
+};
+
+export default class Login extends React.Component<Props, State> {
+    onCancel: Function;
+    onChange: Function;
+    onReset: Function;
+    onSubmit: Function;
+
+    constructor(props: Props) {
+        super(props);
 
         this.state = {
+            username: '',
+            password: '',
             errors: []
         };
+
+        this.onCancel = this.onCancel.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.onReset = this.onReset.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
     }
 
     render() {
         return (
-            <section id="createExperiment">
-                <form onSubmit={this.onSubmit}>
+            <section>
+                <form className='login' onSubmit={this.onSubmit}>
                     <fieldset>
                         <legend>Login</legend>
 
@@ -69,7 +86,45 @@ export default class CreateExperiment extends React.Component {
         );
     }
 
-    componentDidMount() {
+    onCancel(e: SyntheticMouseEvent<HTMLButtonElement>) {
+        e.preventDefault();
+        this.onReset();
+    }
+
+    onChange(e: SyntheticInputEvent<HTMLInputElement>) {
+        const target = e.target;
+
+        this.setState({
+            [target.name]: target.value
+        });
+    }
+
+    onReset() {
+        this.setState({
+            username: '',
+            password: '',
+            errors: []
+        });
+    }
+
+    onSubmit(e: SyntheticMouseEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        const errors = Object.keys(this.state)
+            .filter(key => !['errors'].includes(key) && !this.state[key]);
+
+        if (!errors.length) {
+            axios.post(LOGIN_URL, this.state)
+            .then(data => (
+                this.onReset(),
+                this.props.onLogIn(data.data[0])
+            ))
+            .catch(() => console.log('error'));
+        } else {
+            this.setState({
+                errors: errors
+            });
+        }
     }
 }
 

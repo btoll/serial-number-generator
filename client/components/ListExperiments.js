@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 //import Error from './Error';
 import axios from 'axios';
@@ -8,7 +9,7 @@ import axios from 'axios';
 //    incr
 //} from '../config';
 
-export default class AddReceipt extends React.Component {
+export default class ListExperiments extends React.Component {
     constructor() {
         super();
 
@@ -18,7 +19,9 @@ export default class AddReceipt extends React.Component {
 
     render() {
         return (
-            <div>List Experiments</div>
+            <section>
+                <div>List Experiments</div>
+            </section>
         );
     }
 
