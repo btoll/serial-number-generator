@@ -4,3 +4,35 @@ body {
   font-family: sans-serif;
 }
 
+ul.nav {
+    background-color: turquoise;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.nav li {
+    border: 1px solid turquoise;
+    display: inline-block;
+    padding: 10px;
+}
+
+ul.nav li:hover {
+    background-color: #ccc;
+    border-color: #000;
+}
+
+ul.nav a {
+    color: black;
+    display: inline-block;
+    text-decoration: none;
+}
+
+ul.nav a:hover {
+    cursor: pointer;
+}
+
+ul.nav a.active {
+    text-decoration: underline;
+}
+
