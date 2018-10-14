@@ -26,7 +26,7 @@ prod:
 	@echo "[make] Created bft.zip archive"
 
 start-server:
-	$(CC) $(SERVER) &
+	$(CC) $(SERVER)
 
 start-ui:
 	./node_modules/.bin/webpack-dev-server --open

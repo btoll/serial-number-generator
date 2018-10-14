@@ -1,10 +1,11 @@
 // @flow
 import React from 'react';
-//import Error from './Error';
+import Error from './Error';
 import axios from 'axios';
 import { CREATE_EXPERIMENT_ENDPOINT } from './config';
 
 type State = {
+    code: string,
     disease: string,
     organism: string,
     plateCount: number,
@@ -21,6 +22,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
         super();
 
         this.state = {
+            code: '',
             disease: '',
             organism: '',
             plateCount: 0,
@@ -30,6 +32,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
         };
 
         this.onChange = this.onChange.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
     }
 
     isDisabled() {
@@ -60,16 +63,14 @@ export default class CreateExperiment extends React.Component<{}, State> {
 
         axios({
             url: CREATE_EXPERIMENT_ENDPOINT,
-            method: 'post'
+            method: 'post',
+            data: postData
         })
-        .then(res =>
-            console.log(res)
-            /*
+        .then(res => (
             this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+                code: res.data
             })
-            */
-        )
+        ))
         .catch(console.log);
     }
 
@@ -155,6 +156,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                     </fieldset>
                 </form>
 
+                { !!this.state.code.length && <h2>{this.state.code}</h2> }
                 { !!this.state.errors.length && <Error fields={this.state.errors} /> }
             </section>
         );

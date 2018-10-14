@@ -39,8 +39,7 @@ module.exports = {
     // This tells webpack to get the assets from the publicPath, and then react-router kicks in and
     // loads the /popular assets or wherever you were when the refresh occurred.
     devServer: {
-        historyApiFallback: true,
-        port: 3000
+        historyApiFallback: true
     },
 
     plugins: [

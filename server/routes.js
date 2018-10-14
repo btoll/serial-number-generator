@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 module.exports = app => {
     // For CORS.
     app.use(function(req, res, next) {
@@ -7,31 +9,29 @@ module.exports = app => {
         next();
     });
 
-    /*
-    app.get('/api/scenario', (req, res, next) => {
-        res.send(mockGetAll);
-        next();
-    });
-    */
+    app.post('/create-experiment', (req, res, next) => {
+        const body = req.body;
+        const plateCount = body.plateCount * 1;
+        const repCount = body.repCount * 1;
 
-    /*
-    app.get('/api/scenario/:id', (req, res, next) => {
-        res.send(Object.assign({}, mockGetOne(req.params.id)));
-        next();
-    });
-    */
+        // Our crypto algo will be the following:
+        // 1. Hash the parts of the experiment using SHA256 hash function.
+        // 2. Return a buffer, and we'll use its default view (Uint8Array).
+        const hash = crypto.createHash('sha256');
+        hash.update(`${body.organism}${body.disease}${body.plateCount}${body.repCount}${body.wellCount}`);
+        const buf = hash.digest(); // Not specifying an encoding will return a Buffer.
+        // 3. Iterate over the slice and mod 8 so every number returned is constrained from 0-7.
+        // 4. Prepend `PL-` and append `-1` and send.
+        const a = [];
 
-    app.post('/create-experiment/:id', (req, res, next) => {
-        debugger;
-//        res.send(Object.assign({}, mockGetOne("f72a2e67-8d3b-429c-a630-19d75e01ae80")));
-        next();
-    });
+        // NOTE: This is good enough for now, but they won't be unique given the same input!
 
-    /*
-    app.put('/api/scenario/:scenarioId', (req, res, next) => {
-        res.send(Object.assign({}, mockGetOne(req.params.scenarioId)));
+        for (let v of buf.slice(0, 8)) {
+            a.push(v % 8);
+        }
+
+        res.send(`PL-${a.join('')}-1`);
         next();
     });
-    */
 };
 
