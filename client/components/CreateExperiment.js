@@ -1,8 +1,10 @@
 // @flow
 import React from 'react';
-import Error from './Error';
 import axios from 'axios';
-import { CREATE_EXPERIMENT_ENDPOINT } from './config';
+
+import Error from './Error';
+import List from './List';
+import { CREATE_EXPERIMENT_ENDPOINT, GET_DISEASES_ENDPOINT, GET_ORGANISMS_ENDPOINT } from './config';
 
 type State = {
     code: string,
@@ -28,7 +30,10 @@ export default class CreateExperiment extends React.Component<{}, State> {
             plateCount: 0,
             repCount: 0,
             wellCount: 0,
-            errors: []
+            errors: [],
+
+            diseases: [],
+            organisms: []
         };
 
         this.onChange = this.onChange.bind(this);
@@ -88,33 +93,21 @@ export default class CreateExperiment extends React.Component<{}, State> {
                         <legend>Create Experiment</legend>
                         <div>
                             <label htmlFor="organism">Organism: </label>
-                            <select
-                                autoFocus
+                            <List
                                 name="organism"
-                                value={this.state.organism}
                                 onChange={this.onChange}
-                            >
-                                <option value="">Select an Organism</option>
-                                <option value="butterfly">Butterfly</option>
-                                <option value="cockroach">Cockroach</option>
-                                <option value="dolphin">Dolphin</option>
-                                <option value="worm">Worm</option>
-                            </select>
+                                options={this.state.organisms}
+                                value={this.state.organism}
+                            />
                         </div>
                         <div>
                             <label htmlFor="disease">Disease: </label>
-                            <select
+                            <List
                                 name="disease"
-                                value={this.state.disease}
                                 onChange={this.onChange}
-                            >
-                                <option value="">Select a Disease</option>
-                                <option>D1</option>
-                                <option>D2</option>
-                                <option>D3</option>
-                                <option>D4</option>
-                                <option>D5</option>
-                            </select>
+                                options={this.state.diseases}
+                                value={this.state.disease}
+                            />
                         </div>
                         <div>
                             <label htmlFor="plateCount">Plate Count: </label>
@@ -163,6 +156,33 @@ export default class CreateExperiment extends React.Component<{}, State> {
     }
 
     componentDidMount() {
+//        axios.all([
+//            axios.get(GET_ORGANISMS_ENDPOINT),
+//            axios.get(GET_DISEASES_ENDPOINT)
+//        ])
+//        .then(axios.spread((organisms, diseases) =>
+//            this.setState({
+//                diseases: diseases.data.recordset,
+//                organisms: organisms.data.recordset
+//            })
+//        ))
+//        .catch(console.error);
+
+        axios.get(GET_DISEASES_ENDPOINT)
+        .then(diseases =>
+            this.setState({
+                diseases: diseases.data.recordset
+            })
+        )
+        .catch(console.error);
+
+        axios.get(GET_ORGANISMS_ENDPOINT)
+        .then(organisms =>
+            this.setState({
+                organisms: organisms.data.recordset
+            })
+        )
+        .catch(console.error);
     }
 }
 

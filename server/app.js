@@ -7,6 +7,7 @@ const app = express();
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+require('dotenv').config();
 require(path.join(__dirname, '/routes'))(app);
 
 app.listen(3000, () => {

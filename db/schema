@@ -1,0 +1,43 @@
+USE serial_generator;
+
+CREATE TABLE organism
+(
+    organism_id INT NOT NULL IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+INSERT INTO organism VALUES
+    ('Butterfly'),
+    ('Cockroach'),
+    ('Dolphin'),
+    ('Worm');
+
+CREATE TABLE disease
+(
+    disease_id INT NOT NULL IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+INSERT INTO disease VALUES
+    ('D1'),
+    ('D2'),
+    ('D3'),
+    ('D4'),
+    ('D5');
+
+CREATE TABLE experiment
+(
+    experiment_id INT NOT NULL IDENTITY PRIMARY KEY,
+    organism_id INT NOT NULL,
+    disease_id INT NOT NULL,
+    plate_count INT DEFAULT 0,
+    rep_count INT DEFAULT 0,
+    well_count INT DEFAULT 0,
+
+    CONSTRAINT FK_ORGANISM FOREIGN KEY (organism_id)
+        REFERENCES organism (organism_id)
+        ON UPDATE CASCADE,
+
+    CONSTRAINT FK_DISEASE FOREIGN KEY (disease_id)
+        REFERENCES disease (disease_id)
+        ON UPDATE CASCADE,
+);
+

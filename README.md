@@ -39,6 +39,10 @@ To do this, simply run:
 
     npx flow-typed install react-router-dom
 
+## Environment Variables
+
+This project uses the [dotenv] module to load all environment variables needed by the runtime.  For obvious reasons, we are not versioning this file.
+
 ## Misc
 
 The UI is bootstrapped using webpack on port 3000.  To view, simply:
@@ -52,5 +56,6 @@ The [Express] web framework is handling the network requests and runs on port 30
 [webpack]: https://webpack.js.org/
 [Flow]: https://flow.org/
 [flow-typed]: https://github.com/flow-typed/flow-typed
+[dotenv]: https://www.npmjs.com/package/dotenv
 [Express]: https://expressjs.com/
 
