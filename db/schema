@@ -1,16 +1,5 @@
 USE serial_generator;
 
-CREATE TABLE organism
-(
-    organism_id INT NOT NULL IDENTITY PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
-);
-INSERT INTO organism VALUES
-    ('Butterfly'),
-    ('Cockroach'),
-    ('Dolphin'),
-    ('Worm');
-
 CREATE TABLE disease
 (
     disease_id INT NOT NULL IDENTITY PRIMARY KEY,
@@ -23,9 +12,21 @@ INSERT INTO disease VALUES
     ('D4'),
     ('D5');
 
+CREATE TABLE organism
+(
+    organism_id INT NOT NULL IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+INSERT INTO organism VALUES
+    ('Butterfly'),
+    ('Cockroach'),
+    ('Dolphin'),
+    ('Worm');
+
 CREATE TABLE experiment
 (
     experiment_id INT NOT NULL IDENTITY PRIMARY KEY,
+    serial_number NVARCHAR(20) NOT NULL,
     organism_id INT NOT NULL,
     disease_id INT NOT NULL,
     plate_count INT DEFAULT 0,

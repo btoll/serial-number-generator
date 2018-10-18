@@ -18,11 +18,20 @@ module.exports = app => {
     });
 
     app.post('/create-experiment', async (req, res, next) => {
-        const serialNumber = db.generateSerialNumber(req.body);
-        await db.postExperiment(req.body);
+        const arr = db.generateSerialNumber(req.body);
+        const serialNumber = `PL-${arr.join('')}-1`;
+        await db.postExperiment(serialNumber, req.body);
 
-        res.send(`PL-${serialNumber.join('')}-1`);
+        res.send(serialNumber);
         next();
+    });
+
+    app.get('/list-experiments', async (req, res, next) => {
+        try {
+            res.send(await db.listExperiments());
+        } catch (err) {
+            next(err);
+        }
     });
 };
 

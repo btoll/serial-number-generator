@@ -69,7 +69,15 @@ async function getExperiment() {
     };
 }
 
-async function postExperiment(params) {
+async function listExperiments() {
+    const pool = await connect();
+
+    const experiments = await pool.request().query(`SELECT e.experiment_id, e.serial_number, o.name AS organism, d.name AS disease, e.plate_count, e.rep_count, e.well_count FROM experiment e JOIN organism o ON o.organism_id = e.organism_id JOIN disease d ON d.disease_id = e.disease_id`);
+
+    return experiments;
+}
+
+async function postExperiment(serialNumber, params) {
     const pool = await connect();
     const transaction = new sql.Transaction(pool);
 
@@ -78,7 +86,7 @@ async function postExperiment(params) {
         console.log('err0', err);
 
         const request = new sql.Request(transaction)
-        request.query(`INSERT INTO experiment (organism_id, disease_id, plate_count, rep_count, well_count) VALUES (${Number(params.organism)}, ${Number(params.disease)}, ${Number(params.plateCount)}, ${Number(params.repCount)}, ${Number(params.wellCount)})`, (err, result) => {
+        request.query(`INSERT INTO experiment (serial_number, organism_id, disease_id, plate_count, rep_count, well_count) VALUES ('${serialNumber}', ${Number(params.organism)}, ${Number(params.disease)}, ${Number(params.plateCount)}, ${Number(params.repCount)}, ${Number(params.wellCount)})`, (err, result) => {
             // ... error checks
             console.log('err1', err);
 
@@ -95,6 +103,7 @@ async function postExperiment(params) {
 module.exports = {
     generateSerialNumber,
     getExperiment,
+    listExperiments,
     postExperiment
 };
 

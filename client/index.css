@@ -54,3 +54,20 @@ form label {
     width: 120px;
 }
 
+/********************************* Griddle **************************************/
+table.griddle-table {
+    margin-top: 20px;
+}
+thead.griddle-table-heading {
+    background-color: antiquewhite;
+}
+th.griddle-table-heading-cell {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 200px;
+}
+td.griddle-cell {
+    border-bottom: 1px solid #ccc;
+    padding: 15px;
+}
+
