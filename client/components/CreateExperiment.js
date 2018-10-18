@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import Error from './Error';
 import List from './List';
-import { CREATE_EXPERIMENT_ENDPOINT, GET_DISEASES_ENDPOINT, GET_ORGANISMS_ENDPOINT } from './config';
+import { CREATE_EXPERIMENT_ENDPOINT } from './config';
 
 type State = {
     code: string,
@@ -25,15 +25,17 @@ export default class CreateExperiment extends React.Component<{}, State> {
 
         this.state = {
             code: '',
-            disease: '',
-            organism: '',
+
+            diseases: [],
+            organisms: [],
+
+            disease: 0,
+            organism: 0,
             plateCount: 0,
             repCount: 0,
             wellCount: 0,
-            errors: [],
 
-            diseases: [],
-            organisms: []
+            errors: []
         };
 
         this.onChange = this.onChange.bind(this);
@@ -81,7 +83,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
 
     setName() {
         const state = this.state;
-        return `{${state.organism}}-{${state.disease}}-{${state.plateCount}}-{${state.repCount}}-{${state.wellCount}}-00000001`;
+        return `PL-{${state.organism}}-{${state.disease}}-{${state.plateCount}}-{${state.repCount}}-{${state.wellCount}}-xxxxxxx-1`;
     }
 
     render() {

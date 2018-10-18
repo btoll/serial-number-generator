@@ -13,7 +13,7 @@ export default function List(props) {
             {/* Render options. */}
             {
                 props.options && props.options.map((opt, i) =>
-                    <option key={i}>{opt.name}</option>
+                    <option key={i} value={i + 1}>{opt.name}</option>
                 )
             }
         </select>
