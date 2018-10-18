@@ -7,8 +7,6 @@ const SOCKET = `${PROTOCOL}${HOST}:${PORT}`;
 //const AUTH = `${SOCKET}/api/users/login`;
 const LOGIN_ENDPOINT = `${SOCKET}/login`;
 const CREATE_EXPERIMENT_ENDPOINT = `${SOCKET}/create-experiment`;
-const GET_DISEASES_ENDPOINT = `${SOCKET}/diseases`;
-const GET_ORGANISMS_ENDPOINT = `${SOCKET}/organisms`;
 
 function* incrementer() {
     let n = 100;
@@ -24,8 +22,6 @@ const incr = (i =>
 
 export {
     LOGIN_ENDPOINT,
-    CREATE_EXPERIMENT_ENDPOINT,
-    GET_DISEASES_ENDPOINT,
-    GET_ORGANISMS_ENDPOINT,
+    CREATE_EXPERIMENT_ENDPOINT
 };
 

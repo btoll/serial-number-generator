@@ -10,18 +10,9 @@ module.exports = app => {
         next();
     });
 
-
-    app.get('/organisms', async (req, res, next) => {
+    app.get('/create-experiment', async (req, res, next) => {
         try {
-            res.send(await db.getOrganisms());
-        } catch (err) {
-            next(err);
-        }
-    });
-
-    app.get('/diseases', async (req, res, next) => {
-        try {
-            res.send(await db.getDiseases());
+            res.send(await db.createExperiment());
         } catch (err) {
             next(err);
         }

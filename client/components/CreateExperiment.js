@@ -96,7 +96,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                             <List
                                 name="organism"
                                 onChange={this.onChange}
-                                options={this.state.organisms}
+                                options={this.state.organisms.recordset}
                                 value={this.state.organism}
                             />
                         </div>
@@ -105,7 +105,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                             <List
                                 name="disease"
                                 onChange={this.onChange}
-                                options={this.state.diseases}
+                                options={this.state.diseases.recordset}
                                 value={this.state.disease}
                             />
                         </div>
@@ -115,6 +115,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                                 type="number"
                                 name="plateCount"
                                 step="1"
+                                min="0"
                                 value={this.state.plateCount}
                                 onChange={this.onChange}
                             />
@@ -125,6 +126,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                                 type="number"
                                 name="repCount"
                                 step="1"
+                                min="0"
                                 value={this.state.repCount}
                                 onChange={this.onChange}
                             />
@@ -135,6 +137,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                                 type="number"
                                 name="wellCount"
                                 step="1"
+                                min="0"
                                 value={this.state.wellCount}
                                 onChange={this.onChange}
                             />
@@ -156,32 +159,13 @@ export default class CreateExperiment extends React.Component<{}, State> {
     }
 
     componentDidMount() {
-//        axios.all([
-//            axios.get(GET_ORGANISMS_ENDPOINT),
-//            axios.get(GET_DISEASES_ENDPOINT)
-//        ])
-//        .then(axios.spread((organisms, diseases) =>
-//            this.setState({
-//                diseases: diseases.data.recordset,
-//                organisms: organisms.data.recordset
-//            })
-//        ))
-//        .catch(console.error);
-
-        axios.get(GET_DISEASES_ENDPOINT)
-        .then(diseases =>
+        axios.get(CREATE_EXPERIMENT_ENDPOINT)
+        .then(res => {
             this.setState({
-                diseases: diseases.data.recordset
+                diseases: res.data.diseases,
+                organisms: res.data.organisms
             })
-        )
-        .catch(console.error);
-
-        axios.get(GET_ORGANISMS_ENDPOINT)
-        .then(organisms =>
-            this.setState({
-                organisms: organisms.data.recordset
-            })
-        )
+        })
         .catch(console.error);
     }
 }
