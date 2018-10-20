@@ -1,4 +1,4 @@
-USE serial_generator;
+USE serial_number_generator;
 
 CREATE TABLE disease
 (

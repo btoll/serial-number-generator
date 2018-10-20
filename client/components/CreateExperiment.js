@@ -1,9 +1,11 @@
 // @flow
 import React from 'react';
+import ReactModal from 'react-modal';
 import axios from 'axios';
 
 import Error from './Error';
 import List from './List';
+import Modal from './Modal';
 import { CREATE_EXPERIMENT_ENDPOINT } from './config';
 
 type State = {
@@ -35,11 +37,43 @@ export default class CreateExperiment extends React.Component<{}, State> {
             repCount: 0,
             wellCount: 0,
 
+            modal: {
+                show: false,
+                type: null
+            },
+
             errors: []
         };
 
         this.onChange = this.onChange.bind(this);
+        this.closeModal = this.closeModal.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+
+        // For aria, should hide underyling dom elements when modal is shown.
+        // (For screenreaders.)
+        ReactModal.setAppElement('#root');
+    }
+
+    closeModal(e) {
+        this.setState({
+            modal: {
+                show: false
+            },
+
+            disease: 0,
+            organism: 0,
+            plateCount: 0,
+            repCount: 0,
+            wellCount: 0
+        });
+    }
+
+    openModal(type, e) {
+        this.setState({
+            modal: {
+                show: true
+            }
+        });
     }
 
     isDisabled() {
@@ -75,7 +109,11 @@ export default class CreateExperiment extends React.Component<{}, State> {
         })
         .then(res => (
             this.setState({
-                code: res.data
+                code: res.data,
+                modal: {
+                    show: true,
+                    type: 'createExperiment'
+                }
             })
         ))
         .catch(console.log);
@@ -84,6 +122,30 @@ export default class CreateExperiment extends React.Component<{}, State> {
     setName() {
         const state = this.state;
         return `PL-{${state.organism}}-{${state.disease}}-{${state.plateCount}}-{${state.repCount}}-{${state.wellCount}}-xxxxxxx-1`;
+    }
+
+    showModal() {
+        switch (this.state.modal.type) {
+            case 'createExperiment':
+                return (
+                    <Modal
+                        className={`${this.state.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.closeModal}
+                        showModal={this.state.modal.show}
+                        portalClassName={this.state.modal.type}
+                    >
+                        <>
+                            <h2>Your serial number is:</h2>
+                            <h4>{this.state.code}</h4>
+                            <div>
+                                <button onClick={() => {}}>Print</button>
+                                <button onClick={this.closeModal}>Close</button>
+                            </div>
+                        </>
+                    </Modal>
+
+                );
+        }
     }
 
     render() {
@@ -154,7 +216,11 @@ export default class CreateExperiment extends React.Component<{}, State> {
                     </fieldset>
                 </form>
 
-                { !!this.state.code.length && <h2>{this.state.code}</h2> }
+                {this.state.modal.show ?
+                    this.showModal(this.state.modal.type) :
+                    null
+                }
+
                 { !!this.state.errors.length && <Error fields={this.state.errors} /> }
             </section>
         );

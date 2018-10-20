@@ -14,7 +14,7 @@ module.exports = {
     // https://gist.github.com/gaearon/ca6e803f5c604d37468b0091d9959269
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'serial_generator.js',
+        filename: 'serial_number_generator.js',
         publicPath: '/'
     },
 

@@ -1,5 +1,5 @@
 {
-  "name": "serial-generator",
+  "name": "serial-number-generator",
   "version": "0.1.0",
   "private": true,
   "author": "Benjamin Toll <benjam72@yahoo.com> (http://www.benjamintoll.com)",
@@ -15,7 +15,7 @@
     "mssql": "^4.2.1",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-modal": "^3.5.1",
+    "react-modal": "^3.6.1",
     "react-router-dom": "^4.3.1"
   },
   "devDependencies": {
