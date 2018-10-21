@@ -37,14 +37,6 @@ section {
     margin: 80px 40px 0;
 }
 /********************************* Form **************************************/
-form legend {
-    background: antiquewhite;
-    border: 1px solid #000;
-    border-radius: 4px;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 10px;
-}
 form div {
     margin: 15px;
 }

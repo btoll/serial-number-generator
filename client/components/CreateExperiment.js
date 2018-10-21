@@ -151,69 +151,82 @@ export default class CreateExperiment extends React.Component<{}, State> {
     render() {
         return (
             <section id="createExperiment">
-                <h2>Experiment name: {this.setName()}</h2>
                 <form onSubmit={this.onSubmit}>
-                    <fieldset>
-                        <legend>Create Experiment</legend>
-                        <div>
-                            <label htmlFor="organism">Organism: </label>
-                            <List
-                                name="organism"
-                                onChange={this.onChange}
-                                options={this.state.organisms.recordset}
-                                value={this.state.organism}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="disease">Disease: </label>
-                            <List
-                                name="disease"
-                                onChange={this.onChange}
-                                options={this.state.diseases.recordset}
-                                value={this.state.disease}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="plateCount">Plate Count: </label>
-                            <input
-                                type="number"
-                                name="plateCount"
-                                step="1"
-                                min="0"
-                                value={this.state.plateCount}
-                                onChange={this.onChange}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="repCount">Rep Count: </label>
-                            <input
-                                type="number"
-                                name="repCount"
-                                step="1"
-                                min="0"
-                                value={this.state.repCount}
-                                onChange={this.onChange}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="wellCount">Well Count: </label>
-                            <input
-                                type="number"
-                                name="wellCount"
-                                step="1"
-                                min="0"
-                                value={this.state.wellCount}
-                                onChange={this.onChange}
-                            />
-                        </div>
-                        <div>
-                            <label></label>
-                            <input
-                                disabled={this.isDisabled() ? 'disable' : ''}
-                                type="submit"
-                            />
-                        </div>
-                    </fieldset>
+                    <div>
+                        <label htmlFor="name">Name: </label>
+                        <input
+                            type="text"
+                            readOnly={true}
+                            value={this.setName()}
+                            style={{
+                                backgroundColor: "antiquewhite",
+                                borderWidth: 0,
+                                padding: 5,
+                                width: 200
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="organism">Organism: </label>
+                        <List
+                            name="organism"
+                            onChange={this.onChange}
+                            options={this.state.organisms.recordset}
+                            value={this.state.organism}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="disease">Disease: </label>
+                        <List
+                            name="disease"
+                            onChange={this.onChange}
+                            options={this.state.diseases.recordset}
+                            value={this.state.disease}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="plateCount">Plate Count: </label>
+                        <input
+                            type="number"
+                            name="plateCount"
+                            step="1"
+                            min="0"
+                            value={this.state.plateCount}
+                            style={{width: 70}}
+                            onChange={this.onChange}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="repCount">Rep Count: </label>
+                        <input
+                            type="number"
+                            name="repCount"
+                            step="1"
+                            min="0"
+                            value={this.state.repCount}
+                            style={{width: 70}}
+                            onChange={this.onChange}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="wellCount">Well Count: </label>
+                        <input
+                            type="number"
+                            name="wellCount"
+                            step="1"
+                            min="0"
+                            value={this.state.wellCount}
+                            style={{width: 70}}
+                            onChange={this.onChange}
+                        />
+                    </div>
+                    <div>
+                        <label></label>
+                        <input
+                            disabled={this.isDisabled() ? 'disable' : ''}
+                            type="submit"
+                        />
+                    </div>
                 </form>
 
                 {this.state.modal.show ?
