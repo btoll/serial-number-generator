@@ -1,3 +1,5 @@
+DROP DATABASE serial_number_generator;
+CREATE DATABASE serial_number_generator;
 USE serial_number_generator;
 
 CREATE TABLE disease
@@ -25,7 +27,7 @@ INSERT INTO organism VALUES
 
 CREATE TABLE experiment
 (
-    experiment_id INT NOT NULL IDENTITY PRIMARY KEY,
+    experiment_id NVARCHAR(100) NOT NULL PRIMARY KEY,
     serial_number NVARCHAR(20) NOT NULL,
     organism_id INT NOT NULL,
     disease_id INT NOT NULL,
@@ -39,6 +41,27 @@ CREATE TABLE experiment
 
     CONSTRAINT FK_DISEASE FOREIGN KEY (disease_id)
         REFERENCES disease (disease_id)
-        ON UPDATE CASCADE,
+        ON UPDATE CASCADE
 );
+
+CREATE TABLE plate_stage
+(
+    stage_id INT NOT NULL IDENTITY PRIMARY KEY,
+    stage NVARCHAR(20) NOT NULL
+)
+
+CREATE TABLE plate
+(
+    plate_id INT NOT NULL IDENTITY PRIMARY KEY,
+    experiment_id NVARCHAR(100) NOT NULL,
+    stage_id INT NOT NULL,
+
+    CONSTRAINT FK_EXPERIMENT FOREIGN KEY (experiment_id)
+        REFERENCES experiment (experiment_id)
+        ON UPDATE CASCADE,
+
+    CONSTRAINT FK_PLATE_STAGE FOREIGN KEY (stage_id)
+        REFERENCES plate_stage (stage_id)
+        ON UPDATE CASCADE
+)
 

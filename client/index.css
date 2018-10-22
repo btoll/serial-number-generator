@@ -55,11 +55,13 @@ thead.griddle-table-heading {
 th.griddle-table-heading-cell {
     border: 1px solid #ccc;
     padding: 10px;
-    width: 200px;
 }
 td.griddle-cell {
     border-bottom: 1px solid #ccc;
     padding: 15px;
+}
+/* Center all but the first cell. */
+tr.griddle-row td + td {
     text-align: center;
 }
 /********************************* Modal **************************************/
@@ -93,16 +95,16 @@ td.griddle-cell {
 .ReactModal__Content--before-close {
     opacity: 0;
 }
-.createExperiment {
+.printExperiment {
     padding: 10px 20px 20px;
     width: 20%;
 }
-.createExperiment h4 {
+.printExperiment h4 {
     background-color: peachpuff;
     border: 1px solid darkgoldenrod;
     padding: 20px;
 }
-.createExperiment div button {
-    margin: 0 10px;
+.printExperiment div button {
+    margin: 0 4px;
 }
 

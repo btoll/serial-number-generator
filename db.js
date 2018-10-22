@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const fs = require('fs');
 const sql = require('mssql');
 const env = process.env;
 
@@ -72,12 +73,10 @@ async function getExperiment() {
 async function listExperiments() {
     const pool = await connect();
 
-    const experiments = await pool.request().query(`SELECT e.experiment_id, e.serial_number, o.name AS organism, d.name AS disease, e.plate_count, e.rep_count, e.well_count FROM experiment e JOIN organism o ON o.organism_id = e.organism_id JOIN disease d ON d.disease_id = e.disease_id`);
-
-    return experiments;
+    return await pool.request().query(`SELECT e.experiment_id, e.serial_number, o.name AS organism, d.name AS disease, e.plate_count, e.rep_count, e.well_count FROM experiment e JOIN organism o ON o.organism_id = e.organism_id JOIN disease d ON d.disease_id = e.disease_id`);
 }
 
-async function postExperiment(serialNumber, params) {
+async function postExperiment(uid, body) {
     const pool = await connect();
     const transaction = new sql.Transaction(pool);
 
@@ -86,7 +85,7 @@ async function postExperiment(serialNumber, params) {
         console.log('err0', err);
 
         const request = new sql.Request(transaction)
-        request.query(`INSERT INTO experiment (serial_number, organism_id, disease_id, plate_count, rep_count, well_count) VALUES ('${serialNumber}', ${Number(params.organism)}, ${Number(params.disease)}, ${Number(params.plateCount)}, ${Number(params.repCount)}, ${Number(params.wellCount)})`, (err, result) => {
+        request.query(`INSERT INTO experiment (experiment_id, serial_number, organism_id, disease_id, plate_count, rep_count, well_count) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${Number(body.plateCount)}, ${Number(body.repCount)}, ${Number(body.wellCount)})`, (err, result) => {
             // ... error checks
             console.log('err1', err);
 
@@ -100,10 +99,29 @@ async function postExperiment(serialNumber, params) {
     });
 }
 
+function printExperiment(params) {
+    const {serialNumber, plateCount, repCount} = params;
+    const writeStream = fs.createWriteStream(`experiments/${serialNumber}.txt`);
+    const base = serialNumber.slice(0, -1);
+
+    let k = 1;
+
+    for (let i = 1; i <= repCount; i++) {
+        writeStream.write(`\nRep ${i}\n------------------\n`);
+
+        for (let j = 1; j <= plateCount; j++) {
+            writeStream.write(`${base}${k++}\n`);
+        }
+    }
+
+    writeStream.end();
+}
+
 module.exports = {
     generateSerialNumber,
     getExperiment,
     listExperiments,
-    postExperiment
+    postExperiment,
+    printExperiment
 };
 

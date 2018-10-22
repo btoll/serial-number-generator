@@ -6,15 +6,23 @@ import axios from 'axios';
 import Error from './Error';
 import List from './List';
 import Modal from './Modal';
-import { CREATE_EXPERIMENT_ENDPOINT } from './config';
+import {
+    CREATE_EXPERIMENT_ENDPOINT,
+    PRINT_EXPERIMENT_ENDPOINT,
+} from './config';
 
 type State = {
-    code: string,
+    serialNumber: string,
+
+    diseases: Array<string>,
+    organisms: Array<string>,
+
     disease: string,
     organism: string,
     plateCount: number,
     repCount: number,
     wellCount: number,
+
     errors: Array<string>
 };
 
@@ -26,7 +34,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
         super();
 
         this.state = {
-            code: '',
+            serialNumber: '',
 
             diseases: [],
             organisms: [],
@@ -48,6 +56,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
         this.onChange = this.onChange.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+        this.print = this.print.bind(this);
 
         // For aria, should hide underyling dom elements when modal is shown.
         // (For screenreaders.)
@@ -76,6 +85,22 @@ export default class CreateExperiment extends React.Component<{}, State> {
         });
     }
 
+    getDiseaseName() {
+        return (this.state.diseases.recordset && this.state.disease > 0) ?
+            this.state.diseases.recordset[this.state.disease - 1].name :
+            '';
+    }
+
+    getExperimentName() {
+        return `{${this.getOrganismName()}}-{${this.getDiseaseName()}}-{${this.state.plateCount}}-{${this.state.repCount}}-{${this.state.wellCount}}`;
+    }
+
+    getOrganismName() {
+        return (this.state.organisms.recordset && this.state.organism > 0) ?
+            this.state.organisms.recordset[this.state.organism - 1].name :
+            '';
+    }
+
     isDisabled() {
         const state = this.state;
 
@@ -102,6 +127,8 @@ export default class CreateExperiment extends React.Component<{}, State> {
             postData[key] = value;
         }
 
+        postData.experimentName = this.getExperimentName();
+
         axios({
             url: CREATE_EXPERIMENT_ENDPOINT,
             method: 'post',
@@ -109,24 +136,39 @@ export default class CreateExperiment extends React.Component<{}, State> {
         })
         .then(res => (
             this.setState({
-                code: res.data,
+                serialNumber: res.data,
                 modal: {
                     show: true,
-                    type: 'createExperiment'
+                    type: 'printExperiment'
                 }
             })
         ))
         .catch(console.log);
     }
 
-    setName() {
+    print() {
         const state = this.state;
-        return `PL-{${state.organism}}-{${state.disease}}-{${state.plateCount}}-{${state.repCount}}-{${state.wellCount}}-xxxxxxx-1`;
+
+        axios({
+            url: `${PRINT_EXPERIMENT_ENDPOINT}/${state.serialNumber}/${state.plateCount}/${state.repCount}`,
+            method: 'get'
+        })
+        .then(res => {
+            this.closeModal();
+        })
+        .catch(err => {
+            console.log(err);
+            this.closeModal()
+        });
+    }
+
+    printDisplayName() {
+        return `PL-${this.getExperimentName()}-xxxxxxx-1`;
     }
 
     showModal() {
         switch (this.state.modal.type) {
-            case 'createExperiment':
+            case 'printExperiment':
                 return (
                     <Modal
                         className={`${this.state.modal.type} ReactModal__Content__base`}
@@ -136,9 +178,9 @@ export default class CreateExperiment extends React.Component<{}, State> {
                     >
                         <>
                             <h2>Your serial number is:</h2>
-                            <h4>{this.state.code}</h4>
+                            <h4>PL-{this.state.serialNumber}-x</h4>
                             <div>
-                                <button onClick={() => {}}>Print</button>
+                                <button onClick={this.print}>Print</button>
                                 <button onClick={this.closeModal}>Close</button>
                             </div>
                         </>
@@ -157,12 +199,12 @@ export default class CreateExperiment extends React.Component<{}, State> {
                         <input
                             type="text"
                             readOnly={true}
-                            value={this.setName()}
+                            value={this.printDisplayName()}
                             style={{
                                 backgroundColor: "antiquewhite",
                                 borderWidth: 0,
                                 padding: 5,
-                                width: 200
+                                width: 320
                             }}
                         />
                     </div>

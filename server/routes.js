@@ -19,10 +19,10 @@ module.exports = app => {
 
     app.post('/create-experiment', async (req, res, next) => {
         const arr = db.generateSerialNumber(req.body);
-        const serialNumber = `PL-${arr.join('')}-1`;
-        await db.postExperiment(serialNumber, req.body);
+        const uid = arr.join('');
+        await db.postExperiment(uid, req.body);
 
-        res.send(serialNumber);
+        res.send(uid);
         next();
     });
 
@@ -32,6 +32,12 @@ module.exports = app => {
         } catch (err) {
             next(err);
         }
+    });
+
+    app.get('/print-experiment/:serialNumber/:plateCount/:repCount', (req, res, next) => {
+        db.printExperiment(req.params);
+        res.send('yo');
+        next();
     });
 };
 
