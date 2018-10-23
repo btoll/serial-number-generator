@@ -35,6 +35,7 @@ CREATE TABLE experiment
     plate_count INT DEFAULT 0,
     rep_count INT DEFAULT 0,
     well_count INT DEFAULT 0,
+    active INT DEFAULT 1,
     last_serial_number INT NOT NULL,
 
     CONSTRAINT FK_ORGANISM FOREIGN KEY (organism_id)
@@ -52,22 +53,33 @@ CREATE TABLE stage
     name NVARCHAR(20) NOT NULL
 )
 INSERT INTO stage VALUES
-    ('pre'),
-    ('A'),
-    ('B'),
-    ('C'),
-    ('post');
+    ('Echo'),
+    ('Food'),
+    ('Organism'),
+    ('Incubate'),
+    ('Imaged');
 
 CREATE TABLE plate
 (
     plate_id INT NOT NULL IDENTITY PRIMARY KEY,
     experiment_id INT NOT NULL,
     name NVARCHAR(100) NOT NULL,
-    stage_id INT NOT NULL,
-    notes NTEXT DEFAULT '',
+    active_stage INT DEFAULT 0,
 
     CONSTRAINT FK_EXPERIMENT FOREIGN KEY (experiment_id)
         REFERENCES experiment (experiment_id)
+        ON UPDATE CASCADE
+)
+
+CREATE TABLE notes
+(
+    notes_id INT NOT NULL IDENTITY PRIMARY KEY,
+    plate_id INT NOT NULL,
+    stage_id INT NOT NULL,
+    note NTEXT DEFAULT '',
+
+    CONSTRAINT FK_PLATE FOREIGN KEY (plate_id)
+        REFERENCES plate (plate_id)
         ON UPDATE CASCADE,
 
     CONSTRAINT FK_STAGE FOREIGN KEY (stage_id)

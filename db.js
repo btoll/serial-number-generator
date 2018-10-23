@@ -70,6 +70,56 @@ async function getExperiment() {
     };
 }
 
+async function getNotes(plateID) {
+    const pool = await connect();
+    const result = await pool.request().query(`SELECT COUNT(*) AS totalNotes FROM notes WHERE plate_id=${plateID}`);
+
+    if (result.recordset[0].totalNotes === 0) {
+        const transaction = new sql.Transaction(pool);
+
+        transaction.begin(err => {
+            const request = new sql.Request(transaction);
+
+            let q = `INSERT INTO notes (plate_id, stage_id, note) VALUES `
+            for (let i = 1; i <= 5; i++) {
+                q += `(${plateID}, ${i}, ''),`;
+            }
+
+            // Removing trailing comma.
+            q = q.slice(0, -1);
+
+            request.query(q, (err, result) => {
+                transaction.commit(err => {
+                    console.log(err);
+                    console.log("Transaction committed.");
+                });
+            });
+        });
+    } else {
+        return await pool.request().query(`SELECT * FROM notes WHERE plate_id=${plateID * 1}`);
+    }
+
+}
+
+async function putNotes(plateID, body) {
+    const pool = await connect();
+    const selected = body.selected * 1;
+    const notes = body.notes;
+
+    for (let i = 0; i < 5; i++) {
+        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${i + 1}`);
+    }
+
+    await pool.request().query(`UPDATE plate SET active_stage=${selected} WHERE plate_id=${plateID}`);
+    pool.close();
+}
+
+async function getStages() {
+    const pool = await connect();
+
+    return await pool.request().query(`SELECT * FROM stage`);
+}
+
 async function listExperiments() {
     const pool = await connect();
 
@@ -88,7 +138,7 @@ async function postExperiment(uid, body) {
         const request = new sql.Request(transaction);
         // https://stackoverflow.com/questions/36745952/node-mssql-transaction-insert-returning-the-inserted-id
         // https://blog.sqlauthority.com/2007/03/25/sql-server-identity-vs-scope_identity-vs-ident_current-retrieve-last-inserted-identity-of-record/
-        request.query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, last_serial_number) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_insert_id`, (err, result) => {
+        request.query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, active, last_serial_number) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, 1, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_insert_id`, (err, result) => {
             // ... error checks
 
             transaction.commit(err => {
@@ -96,7 +146,7 @@ async function postExperiment(uid, body) {
 
                 console.log("Transaction committed.");
 
-                let q = `INSERT INTO plate (experiment_id, name, stage_id) VALUES `;
+                let q = `INSERT INTO plate (experiment_id, name, active_stage) VALUES `;
                 let k = 1;
 
                 for (let i = 1; i <= repCount; i++) {
@@ -154,14 +204,17 @@ async function viewExperiment(experimentID) {
     //
     // I don't know if this is expected behavior from SQL SERVER or if this is a bug.  No time to look into it now.
     // 2018-10-22
-    return await pool.request().query(`SELECT p.name, p.notes, s.name AS stage FROM plate p JOIN stage s ON s.stage_id = p.stage_id WHERE p.experiment_id=${Number(experimentID)}`);
+    return await pool.request().query(`SELECT p.plate_id, p.name, p.active_stage, s.name AS stage FROM plate p JOIN stage s ON s.stage_id = p.active_stage WHERE p.experiment_id=${Number(experimentID)}`);
 }
 
 module.exports = {
     generateSerialNumber,
     getExperiment,
+    getNotes,
+    getStages,
     listExperiments,
     postExperiment,
+    putNotes,
     printExperiment,
     viewExperiment
 };

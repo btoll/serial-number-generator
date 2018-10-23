@@ -5,10 +5,12 @@ const PORT = '3000';
 
 const SOCKET = `${PROTOCOL}${HOST}:${PORT}`;
 //const AUTH = `${SOCKET}/api/users/login`;
-const LOGIN_ENDPOINT = `${SOCKET}/login`;
 const CREATE_EXPERIMENT_ENDPOINT = `${SOCKET}/create-experiment`;
 const LIST_EXPERIMENTS_ENDPOINT = `${SOCKET}/list-experiments`;
+const LOGIN_ENDPOINT = `${SOCKET}/login`;
+const NOTES_ENDPOINT = `${SOCKET}/notes`;
 const PRINT_EXPERIMENT_ENDPOINT = `${SOCKET}/print-experiment`;
+const STAGES_ENDPOINT = `${SOCKET}/stages`;
 const VIEW_EXPERIMENT_ENDPOINT = `${SOCKET}/view-experiment`;
 
 function* incrementer() {
@@ -24,10 +26,12 @@ const incr = (i =>
 )(incrementer());
 
 export {
-    LOGIN_ENDPOINT,
     CREATE_EXPERIMENT_ENDPOINT,
     LIST_EXPERIMENTS_ENDPOINT,
+    LOGIN_ENDPOINT,
+    NOTES_ENDPOINT,
     PRINT_EXPERIMENT_ENDPOINT,
+    STAGES_ENDPOINT,
     VIEW_EXPERIMENT_ENDPOINT
 };
 

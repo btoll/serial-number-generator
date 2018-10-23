@@ -45,13 +45,7 @@ export default class ListExperiments extends React.Component<{}, {}> {
         this.setState({
             modal: {
                 show: false
-            },
-
-            disease: 0,
-            organism: 0,
-            plateCount: 0,
-            repCount: 0,
-            wellCount: 0
+            }
         });
     }
 

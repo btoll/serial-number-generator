@@ -36,15 +36,42 @@ module.exports = app => {
         }
     });
 
+    app.get('/notes/:plateID', async (req, res, next) => {
+        try {
+            res.send(await db.getNotes(req.params.plateID * 1));
+            next();
+        } catch (err) {
+            next(err);
+        }
+    });
+
+    app.put('/notes/:plateID', async (req, res, next) => {
+        try {
+            res.send(await db.putNotes(req.params.plateID * 1, req.body));
+            next();
+        } catch (err) {
+            next(err);
+        }
+    });
+
     app.get('/print-experiment/:serialNumber/:plateCount/:repCount', (req, res, next) => {
         db.printExperiment(req.params);
         res.send();
         next();
     });
 
-    app.get('/view-experiment/:id', async (req, res, next) => {
+    app.get('/stages', async (req, res, next) => {
         try {
-            res.send(await db.viewExperiment(req.params.id));
+            res.send(await db.getStages());
+            next();
+        } catch (err) {
+            next(err);
+        }
+    });
+
+    app.get('/view-experiment/:experimentID', async (req, res, next) => {
+        try {
+            res.send(await db.viewExperiment(req.params.experimentID));
             next();
         } catch (err) {
             next(err);
