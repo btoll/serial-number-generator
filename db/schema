@@ -27,13 +27,15 @@ INSERT INTO organism VALUES
 
 CREATE TABLE experiment
 (
-    experiment_id NVARCHAR(100) NOT NULL PRIMARY KEY,
+    experiment_id INT NOT NULL IDENTITY PRIMARY KEY,
+    experiment_name NVARCHAR(100) NOT NULL,
     serial_number NVARCHAR(20) NOT NULL,
     organism_id INT NOT NULL,
     disease_id INT NOT NULL,
     plate_count INT DEFAULT 0,
     rep_count INT DEFAULT 0,
     well_count INT DEFAULT 0,
+    last_serial_number INT NOT NULL,
 
     CONSTRAINT FK_ORGANISM FOREIGN KEY (organism_id)
         REFERENCES organism (organism_id)
@@ -44,24 +46,32 @@ CREATE TABLE experiment
         ON UPDATE CASCADE
 );
 
-CREATE TABLE plate_stage
+CREATE TABLE stage
 (
     stage_id INT NOT NULL IDENTITY PRIMARY KEY,
-    stage NVARCHAR(20) NOT NULL
+    name NVARCHAR(20) NOT NULL
 )
+INSERT INTO stage VALUES
+    ('pre'),
+    ('A'),
+    ('B'),
+    ('C'),
+    ('post');
 
 CREATE TABLE plate
 (
     plate_id INT NOT NULL IDENTITY PRIMARY KEY,
-    experiment_id NVARCHAR(100) NOT NULL,
+    experiment_id INT NOT NULL,
+    name NVARCHAR(100) NOT NULL,
     stage_id INT NOT NULL,
+    notes NTEXT DEFAULT '',
 
     CONSTRAINT FK_EXPERIMENT FOREIGN KEY (experiment_id)
         REFERENCES experiment (experiment_id)
         ON UPDATE CASCADE,
 
-    CONSTRAINT FK_PLATE_STAGE FOREIGN KEY (stage_id)
-        REFERENCES plate_stage (stage_id)
+    CONSTRAINT FK_STAGE FOREIGN KEY (stage_id)
+        REFERENCES stage (stage_id)
         ON UPDATE CASCADE
 )
 

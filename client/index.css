@@ -81,7 +81,7 @@ tr.griddle-row td + td {
     top: 50%;
     left: 50%;
     height: auto;
-    max-height: 80%;
+    max-height: 95%;
     max-width: 95%;
     padding: 10px;
     border-radius: 3px;
@@ -106,5 +106,9 @@ tr.griddle-row td + td {
 }
 .printExperiment div button {
     margin: 0 4px;
+}
+
+.viewExperiment tr.griddle-row td {
+    text-align: center;
 }
 

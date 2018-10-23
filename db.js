@@ -73,7 +73,7 @@ async function getExperiment() {
 async function listExperiments() {
     const pool = await connect();
 
-    return await pool.request().query(`SELECT e.experiment_id, e.serial_number, o.name AS organism, d.name AS disease, e.plate_count, e.rep_count, e.well_count FROM experiment e JOIN organism o ON o.organism_id = e.organism_id JOIN disease d ON d.disease_id = e.disease_id`);
+    return await pool.request().query(`SELECT e.experiment_id, e.experiment_name, e.serial_number, o.name AS organism, d.name AS disease, e.plate_count, e.rep_count, e.well_count FROM experiment e JOIN organism o ON o.organism_id = e.organism_id JOIN disease d ON d.disease_id = e.disease_id`);
 }
 
 async function postExperiment(uid, body) {
@@ -82,18 +82,42 @@ async function postExperiment(uid, body) {
 
     transaction.begin(err => {
         // ... error checks
-        console.log('err0', err);
+        const plateCount = body.plateCount * 1;
+        const repCount = body.repCount * 1;
 
-        const request = new sql.Request(transaction)
-        request.query(`INSERT INTO experiment (experiment_id, serial_number, organism_id, disease_id, plate_count, rep_count, well_count) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${Number(body.plateCount)}, ${Number(body.repCount)}, ${Number(body.wellCount)})`, (err, result) => {
+        const request = new sql.Request(transaction);
+        // https://stackoverflow.com/questions/36745952/node-mssql-transaction-insert-returning-the-inserted-id
+        // https://blog.sqlauthority.com/2007/03/25/sql-server-identity-vs-scope_identity-vs-ident_current-retrieve-last-inserted-identity-of-record/
+        request.query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, last_serial_number) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_insert_id`, (err, result) => {
             // ... error checks
-            console.log('err1', err);
 
             transaction.commit(err => {
                 // ... error checks
 
-                console.log('err2', err);
-                console.log("Transaction committed.")
+                console.log("Transaction committed.");
+
+                let q = `INSERT INTO plate (experiment_id, name, stage_id) VALUES `;
+                let k = 1;
+
+                for (let i = 1; i <= repCount; i++) {
+                    for (let j = 1; j <= plateCount; j++) {
+                        // See links above for how to get the last inserted id.
+                        q += `(${result.recordset[0].last_insert_id}, 'Rep ${i} PL-${uid}-${k++}', 1),`
+                    }
+                }
+
+                // Removing trailing comma.
+                q = q.slice(0, -1);
+
+                transaction.begin(err => {
+                    const request = new sql.Request(transaction);
+
+                    request.query(q, (err, result) => {
+                        transaction.commit(err => {
+                            console.log("Transaction 2 committed.")
+                        });
+                    });
+                });
             })
         })
     });
@@ -101,7 +125,7 @@ async function postExperiment(uid, body) {
 
 function printExperiment(params) {
     const {serialNumber, plateCount, repCount} = params;
-    const writeStream = fs.createWriteStream(`experiments/${serialNumber}.txt`);
+    const writeStream = fs.createWriteStream(`experiments/PL-${serialNumber}-x.txt`);
     const base = serialNumber.slice(0, -1);
 
     let k = 1;
@@ -110,11 +134,27 @@ function printExperiment(params) {
         writeStream.write(`\nRep ${i}\n------------------\n`);
 
         for (let j = 1; j <= plateCount; j++) {
-            writeStream.write(`${base}${k++}\n`);
+            writeStream.write(`PL-${base}-${k++}\n`);
         }
     }
 
     writeStream.end();
+}
+
+async function viewExperiment(experimentID) {
+    const pool = await connect();
+
+    // NOTE: I created the alias below (`s.name AS stage`) b/c the data was returning `p.name` and `s.name`
+    // as an array, i.e.:
+    //
+    //          {
+    //              name: ["Rep 1 PL-21612424-1", "pre"],
+    //              notes: ""
+    //          }
+    //
+    // I don't know if this is expected behavior from SQL SERVER or if this is a bug.  No time to look into it now.
+    // 2018-10-22
+    return await pool.request().query(`SELECT p.name, p.notes, s.name AS stage FROM plate p JOIN stage s ON s.stage_id = p.stage_id WHERE p.experiment_id=${Number(experimentID)}`);
 }
 
 module.exports = {
@@ -122,6 +162,7 @@ module.exports = {
     getExperiment,
     listExperiments,
     postExperiment,
-    printExperiment
+    printExperiment,
+    viewExperiment
 };
 

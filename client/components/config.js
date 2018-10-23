@@ -9,6 +9,7 @@ const LOGIN_ENDPOINT = `${SOCKET}/login`;
 const CREATE_EXPERIMENT_ENDPOINT = `${SOCKET}/create-experiment`;
 const LIST_EXPERIMENTS_ENDPOINT = `${SOCKET}/list-experiments`;
 const PRINT_EXPERIMENT_ENDPOINT = `${SOCKET}/print-experiment`;
+const VIEW_EXPERIMENT_ENDPOINT = `${SOCKET}/view-experiment`;
 
 function* incrementer() {
     let n = 100;
@@ -26,6 +27,7 @@ export {
     LOGIN_ENDPOINT,
     CREATE_EXPERIMENT_ENDPOINT,
     LIST_EXPERIMENTS_ENDPOINT,
-    PRINT_EXPERIMENT_ENDPOINT
+    PRINT_EXPERIMENT_ENDPOINT,
+    VIEW_EXPERIMENT_ENDPOINT
 };
 

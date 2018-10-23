@@ -1,13 +1,19 @@
 // @flow
 import React from 'react';
+import ReactModal from 'react-modal';
 import axios from 'axios';
 import Griddle, { plugins, RowDefinition, ColumnDefinition } from 'griddle-react';
 
 import Error from './Error';
-import { LIST_EXPERIMENTS_ENDPOINT } from './config';
+import Modal from './Modal';
+import ViewExperiment from './modal/ViewExperiment';
+import {
+    LIST_EXPERIMENTS_ENDPOINT,
+    VIEW_EXPERIMENT_ENDPOINT
+} from './config';
 
 type State = {
-    experiments: Array<string>,
+    experiments: Array<object>,
     errors: Array<string>
 };
 
@@ -17,6 +23,7 @@ export default class ListExperiments extends React.Component<{}, {}> {
 
         this.state = {
             experiments: [],
+            experiment: {},
 
             modal: {
                 show: false,
@@ -25,6 +32,13 @@ export default class ListExperiments extends React.Component<{}, {}> {
 
             errors: []
         };
+
+        this.closeModal = this.closeModal.bind(this);
+        this.viewExperiment = this.viewExperiment.bind(this);
+
+        // For aria, should hide underyling dom elements when modal is shown.
+        // (For screenreaders.)
+        ReactModal.setAppElement('#root');
     }
 
     closeModal(e) {
@@ -49,6 +63,46 @@ export default class ListExperiments extends React.Component<{}, {}> {
         });
     }
 
+    showModal() {
+        switch (this.state.modal.type) {
+            case 'viewExperiment':
+                return (
+                    <Modal
+                        className={`${this.state.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.closeModal}
+                        showModal={this.state.modal.show}
+                        portalClassName={this.state.modal.type}
+                    >
+                        <ViewExperiment
+                            experiment={this.state.experiment}
+                            onCloseModal={this.closeModal}
+                        />
+                    </Modal>
+                );
+        }
+    }
+
+    viewExperiment(experimentName, e) {
+        e.preventDefault();
+        const experiment = this.state.experiments.filter(e => experimentName === e.experiment_name)[0];
+
+        axios.get(`${VIEW_EXPERIMENT_ENDPOINT}/${experiment.experiment_id}`)
+        .then(res => {
+            this.setState({
+                experiment: {
+                    id: experiment.experiment_id,
+                    name: experimentName,
+                    plates: res.data.recordset
+                },
+                modal: {
+                    show: true,
+                    type: 'viewExperiment'
+                }
+            })
+        })
+        .catch(console.error);
+    }
+
     render() {
         return (
             <section>
@@ -62,11 +116,11 @@ export default class ListExperiments extends React.Component<{}, {}> {
                 >
                     <RowDefinition>
                         <ColumnDefinition
-                            id="experiment_id"
-                            title="Experiment ID"
+                            id="experiment_name"
+                            title="Experiment Name"
                             customComponent={
                                 ({value}) =>
-                                    <a href={`#`}>{value}</a>
+                                    <a href={`#`} onClick={this.viewExperiment.bind(this, value)}>{value}</a>
                             }
                         />
                         <ColumnDefinition id="serial_number" title="Serial Number" width={250} />
@@ -77,6 +131,11 @@ export default class ListExperiments extends React.Component<{}, {}> {
                         <ColumnDefinition id="well_count" title="Well Count" width={100} />
                     </RowDefinition>
                 </Griddle>
+
+                {this.state.modal.show ?
+                    this.showModal(this.state.modal.type) :
+                    null
+                }
             </section>
         );
     }

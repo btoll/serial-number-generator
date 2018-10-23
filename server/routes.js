@@ -12,6 +12,7 @@ module.exports = app => {
     app.get('/create-experiment', async (req, res, next) => {
         try {
             res.send(await db.getExperiment());
+            next();
         } catch (err) {
             next(err);
         }
@@ -29,6 +30,7 @@ module.exports = app => {
     app.get('/list-experiments', async (req, res, next) => {
         try {
             res.send(await db.listExperiments());
+            next();
         } catch (err) {
             next(err);
         }
@@ -36,8 +38,17 @@ module.exports = app => {
 
     app.get('/print-experiment/:serialNumber/:plateCount/:repCount', (req, res, next) => {
         db.printExperiment(req.params);
-        res.send('yo');
+        res.send();
         next();
+    });
+
+    app.get('/view-experiment/:id', async (req, res, next) => {
+        try {
+            res.send(await db.viewExperiment(req.params.id));
+            next();
+        } catch (err) {
+            next(err);
+        }
     });
 };
 
