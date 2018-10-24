@@ -26,33 +26,69 @@ export default class ViewExperiment extends React.Component {
         };
 
         this.closeModal = this.closeModal.bind(this);
+        this.replace = this.replace.bind(this);
+        this.replacePlate = this.replacePlate.bind(this);
         this.showNotes = this.showNotes.bind(this);
     }
 
     closeModal(selected) {
-        let plates = this.state.plates.concat();
+        if (selected) {
+            let plates = this.state.plates.concat();
 
-        plates = plates.map(plate => {
-            if (this.state.selectedPlate.plate_id === plate.plate_id) {
-                plate.active_stage = selected;
-                plate.stage = this.state.stages[selected - 1].name;
-            }
+            plates = plates.map(plate => {
+                if (this.state.selectedPlate.plate_id === plate.plate_id) {
+                    plate.active_stage = selected;
+                    plate.stage = this.state.stages[selected - 1].name;
+                }
 
-            return plate
-        });
+                return plate
+            });
 
-        this.setState({
-            modal: {
-                show: false
-            },
-            plates
-        });
+            this.setState({
+                modal: {
+                    show: false
+                },
+                plates
+            });
+        } else {
+            this.setState({
+                modal: {
+                    show: false
+                }
+            });
+        }
     }
 
     openModal(type, e) {
         this.setState({
             modal: {
-                show: true
+                show: true,
+                type
+            }
+        });
+    }
+
+    replace() {
+//        axios.get(`${NOTES_ENDPOINT}/${selectedPlate.plate_id}`)
+//        .then(res => {
+//            this.setState({
+//                selectedPlate: selectedPlate,
+//                modal: {
+//                    show: true,
+//                    type: 'notes'
+//                },
+//                notes: res.data && res.data.recordset
+//            })
+//        })
+//        .catch(console.error);
+    }
+
+    replacePlate(rowID) {
+        this.setState({
+            selectedPlate: Object.assign(this.props.experiment.plates[rowID]),
+            modal: {
+                show: true,
+                type: 'replacePlate'
             }
         });
     }
@@ -73,6 +109,25 @@ export default class ViewExperiment extends React.Component {
                             notes={this.state.notes}
                             onCloseModal={this.closeModal}
                         />
+                    </Modal>
+                );
+
+            case 'replacePlate':
+                return (
+                    <Modal
+                        className={`${this.state.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.closeModal}
+                        showModal={this.state.modal.show}
+                        portalClassName={this.state.modal.type}
+                    >
+                        <>
+                            <p>This operation will <b>archive</b> the current plate and generate a new one.</p>
+                            <p>Are you sure you want to proceed?</p>
+                        </>
+                        <div>
+                            <button onClick={this.replace}>Yes</button>
+                            <button onClick={this.closeModal}>No</button>
+                        </div>
                     </Modal>
                 );
         }
@@ -125,8 +180,9 @@ export default class ViewExperiment extends React.Component {
                             id="replace"
                             title=" "
                             customComponent={
-                                () =>
-                                    <button>Replace</button>
+                                (o) => {
+                                    return <button onClick={this.replacePlate.bind(this, o.griddleKey)}>Replace</button>
+                                }
                             }
                         />
                     </RowDefinition>

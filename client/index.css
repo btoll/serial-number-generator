@@ -137,6 +137,9 @@ tr.griddle-row td + td {
 .printExperiment div button {
     margin: 0 4px;
 }
+.replacePlate {
+    width: 350px;
+}
 .viewExperiment tr.griddle-row td {
     text-align: center;
 }

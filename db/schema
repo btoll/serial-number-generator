@@ -35,7 +35,6 @@ CREATE TABLE experiment
     plate_count INT DEFAULT 0,
     rep_count INT DEFAULT 0,
     well_count INT DEFAULT 0,
-    active INT DEFAULT 1,
     last_serial_number INT NOT NULL,
 
     CONSTRAINT FK_ORGANISM FOREIGN KEY (organism_id)
@@ -71,6 +70,19 @@ CREATE TABLE plate
         ON UPDATE CASCADE
 )
 
+CREATE TABLE replaced_plate
+(
+    replaced_plate_id INT NOT NULL IDENTITY PRIMARY KEY,
+    old_plate_id INT NOT NULL,
+    old_experiment_id INT NOT NULL,
+    old_name NVARCHAR(100) NOT NULL,
+    old_active_stage INT DEFAULT 0,
+
+    CONSTRAINT FK_EXPERIMENT_REPLACED_PLATE FOREIGN KEY (old_experiment_id)
+        REFERENCES experiment (experiment_id)
+        ON UPDATE CASCADE
+)
+
 CREATE TABLE notes
 (
     notes_id INT NOT NULL IDENTITY PRIMARY KEY,
@@ -83,6 +95,23 @@ CREATE TABLE notes
         ON UPDATE CASCADE,
 
     CONSTRAINT FK_STAGE FOREIGN KEY (stage_id)
+        REFERENCES stage (stage_id)
+        ON UPDATE CASCADE
+)
+
+CREATE TABLE replaced_notes
+(
+    replaced_notes_id INT NOT NULL IDENTITY PRIMARY KEY,
+    old_notes_id INT NOT NULL,
+    old_plate_id INT NOT NULL,
+    old_stage_id INT NOT NULL,
+    old_note NTEXT DEFAULT '',
+
+    CONSTRAINT FK_PLATE_REPLACED_NOTES FOREIGN KEY (old_plate_id)
+        REFERENCES plate (plate_id)
+        ON UPDATE CASCADE,
+
+    CONSTRAINT FK_STAGE_REPLACED_NOTES FOREIGN KEY (old_stage_id)
         REFERENCES stage (stage_id)
         ON UPDATE CASCADE
 )

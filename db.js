@@ -138,7 +138,7 @@ async function postExperiment(uid, body) {
         const request = new sql.Request(transaction);
         // https://stackoverflow.com/questions/36745952/node-mssql-transaction-insert-returning-the-inserted-id
         // https://blog.sqlauthority.com/2007/03/25/sql-server-identity-vs-scope_identity-vs-ident_current-retrieve-last-inserted-identity-of-record/
-        request.query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, active, last_serial_number) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, 1, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_insert_id`, (err, result) => {
+        request.query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, last_serial_number) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_insert_id`, (err, result) => {
             // ... error checks
 
             transaction.commit(err => {
@@ -191,6 +191,10 @@ function printExperiment(params) {
     writeStream.end();
 }
 
+async function replacePlate(plateID) {
+    //insert into replaced (plate_id, experiment_id, name, active_stage) select plate_id, experiment_id, name, active_stage from plate where plate_id=1
+}
+
 async function viewExperiment(experimentID) {
     const pool = await connect();
 
@@ -216,6 +220,7 @@ module.exports = {
     postExperiment,
     putNotes,
     printExperiment,
+    replacePlate,
     viewExperiment
 };
 

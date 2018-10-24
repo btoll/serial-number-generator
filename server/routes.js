@@ -60,6 +60,15 @@ module.exports = app => {
         next();
     });
 
+    app.post('/replace/:plateID', async (req, res, next) => {
+        try {
+            res.send(await db.replacePlate(req.params.plateID * 1, req.body));
+            next();
+        } catch (err) {
+            next(err);
+        }
+    });
+
     app.get('/stages', async (req, res, next) => {
         try {
             res.send(await db.getStages());

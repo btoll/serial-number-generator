@@ -10,7 +10,15 @@ export default class Notes extends React.Component {
 
         this.state = {
             selected: props.plate.active_stage,
-            notes: props.notes ? props.notes.concat() : [...Array(5)].map(e => '')
+            notes: props.notes ?
+                props.notes.concat() :
+                    [
+                        { note: '' },
+                        { note: '' },
+                        { note: '' },
+                        { note: '' },
+                        { note: '' }
+                    ]
         };
 
         this.onRadioChange = this.onRadioChange.bind(this);
