@@ -6,9 +6,19 @@
 
     npm install
 
-> If you get any warnings about vulnerabilites, you can choose to fix them or not.  Either way the app will run.
+Note that if you get any warnings about vulnerabilities, you can choose to fix them or not.  Either way the app will run.
 
-## Starting
+### SQL Server Database
+
+You'll find the database schema in `db/schema`.  Assuming that SQL Server is already installed and running on the machine, you can import by issuing the following command in the same directory:
+
+    sqlcmd -S localhost -U SA -i schema
+
+Note that I'm running Debian Linux, and I'm not sure if the `sqlcmd` tool is platform-agnostic.
+
+## Starting with Webpack
+
+### Unix
 
     npm start
     or
@@ -16,14 +26,25 @@
 
 Note that this backgrounds the Node process.  All logging to `stdout` is from [webpack].
 
-## Windows
+### Windows
 
 If you have trouble starting the application on Windows, you'll need to run the commands manually from the root of the project directory:
 
     node ./server/app.js &
 	./node_modules/.bin/webpack-dev-server --open
 
-# Type Checking
+## Starting without Webpack
+
+Grab a development build out of the `dist/dev/` directory and follow these steps:
+
+1. Put `index.html` and `serial_number_generator.js` in the same directory wherever your webserver is serving files.
+2. Start the Express webserver, which will communicate with the backend SQL Server database.  This command can be run in the root project directory (wherever you `git` cloned the project):
+
+        node server/app.js
+
+3. Simply point your browser at the `index.html` file.
+
+## Type Checking
 
 This project uses [Flow] for static type checking.  Running:
 
@@ -41,7 +62,7 @@ To do this, simply run:
 
 ## Environment Variables
 
-This project uses the [dotenv] module to load all environment variables needed by the runtime.  For obvious reasons, we are not versioning this file.
+This project uses the [dotenv] module to load all environment variables needed by the runtime.  This file is called `.env` and is located in the root of the project.
 
 ## Misc
 
