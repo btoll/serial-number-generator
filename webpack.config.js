@@ -13,7 +13,7 @@ module.exports = {
     // https://reactjs.org/docs/code-splitting.html
     // https://gist.github.com/gaearon/ca6e803f5c604d37468b0091d9959269
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist/dev'),
         filename: 'serial_number_generator.js',
         publicPath: '/'
     },

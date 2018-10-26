@@ -1,5 +1,5 @@
      CC = node
-    BFT = corelyticsbftapi.azurewebsites.net
+    SNG = corelyticsbftapi.azurewebsites.net
  CONFIG = ./client/components/config.js
 DEVPORT = 3001
  SERVER = ./server/app.js
@@ -7,23 +7,23 @@ DEVPORT = 3001
 .PHONY: clean dev prod start-server start-ui serve
 
 clean:
-	rm -rf dist/
+	rm -rf sng.zip dist/
 
 dev:
 	@sed -i 's/https:/http:/' $(CONFIG)
-	@sed -i 's/$(BFT)/localhost/' $(CONFIG)
+	@sed -i 's/$(SNG)/localhost/' $(CONFIG)
 	@sed -i 's/443/$(DEVPORT)/' $(CONFIG)
 	@echo "[make] Changed endpoint socket -> http://localhost:$(DEVPORT)"
 
 prod:
 	@sed -i 's/http:/https:/' $(CONFIG)
-	@sed -i 's/localhost/$(BFT)/' $(CONFIG)
+	@sed -i 's/localhost/$(SNG)/' $(CONFIG)
 	@sed -i 's/$(DEVPORT)/443/' $(CONFIG)
-	@echo "[make] Changed endpoint socket -> https://$(BFT):443"
+	@echo "[make] Changed endpoint socket -> https://$(SNG):443"
 	@./node_modules/.bin/webpack
-	@echo "[make] Created index.html and bft.js in dist/"
-	@zip -r bft.zip dist/
-	@echo "[make] Created bft.zip archive"
+	@echo "[make] Created index.html and serial_number_generator.js in dist/"
+	@zip -r sng.zip dist/
+	@echo "[make] Created sng.zip archive"
 
 start-server:
 	$(CC) $(SERVER)

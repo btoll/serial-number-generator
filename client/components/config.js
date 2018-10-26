@@ -10,6 +10,7 @@ const LIST_EXPERIMENTS_ENDPOINT = `${SOCKET}/list-experiments`;
 const LOGIN_ENDPOINT = `${SOCKET}/login`;
 const NOTES_ENDPOINT = `${SOCKET}/notes`;
 const PRINT_EXPERIMENT_ENDPOINT = `${SOCKET}/print-experiment`;
+const REPLACE_PLATE_ENDPOINT = `${SOCKET}/replace`;
 const STAGES_ENDPOINT = `${SOCKET}/stages`;
 const VIEW_EXPERIMENT_ENDPOINT = `${SOCKET}/view-experiment`;
 
@@ -31,6 +32,7 @@ export {
     LOGIN_ENDPOINT,
     NOTES_ENDPOINT,
     PRINT_EXPERIMENT_ENDPOINT,
+    REPLACE_PLATE_ENDPOINT,
     STAGES_ENDPOINT,
     VIEW_EXPERIMENT_ENDPOINT
 };

@@ -13,11 +13,11 @@ export default class Notes extends React.Component {
             notes: props.notes ?
                 props.notes.concat() :
                     [
-                        { note: '' },
-                        { note: '' },
-                        { note: '' },
-                        { note: '' },
-                        { note: '' }
+                        { note: '', stage_id: 1 },
+                        { note: '', stage_id: 2 },
+                        { note: '', stage_id: 3 },
+                        { note: '', stage_id: 4 },
+                        { note: '', stage_id: 5 }
                     ]
         };
 

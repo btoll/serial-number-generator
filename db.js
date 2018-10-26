@@ -107,7 +107,8 @@ async function putNotes(plateID, body) {
     const notes = body.notes;
 
     for (let i = 0; i < 5; i++) {
-        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${i + 1}`);
+//        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${i + 1}`);
+        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${notes[i].stage_id}`);
     }
 
     await pool.request().query(`UPDATE plate SET active_stage=${selected} WHERE plate_id=${plateID}`);
@@ -146,13 +147,13 @@ async function postExperiment(uid, body) {
 
                 console.log("Transaction committed.");
 
-                let q = `INSERT INTO plate (experiment_id, name, active_stage) VALUES `;
+                let q = `INSERT INTO plate (experiment_id, rep, name, active_stage) VALUES `;
                 let k = 1;
 
                 for (let i = 1; i <= repCount; i++) {
                     for (let j = 1; j <= plateCount; j++) {
                         // See links above for how to get the last inserted id.
-                        q += `(${result.recordset[0].last_insert_id}, 'Rep ${i} PL-${uid}-${k++}', 1),`
+                        q += `(${result.recordset[0].last_insert_id}, ${i}, 'PL-${uid}-${k++}', 1),`
                     }
                 }
 
@@ -191,8 +192,26 @@ function printExperiment(params) {
     writeStream.end();
 }
 
-async function replacePlate(plateID) {
-    //insert into replaced (plate_id, experiment_id, name, active_stage) select plate_id, experiment_id, name, active_stage from plate where plate_id=1
+async function replacePlate(experimentID, plateID) {
+    const pool = await connect();
+    const result = await pool.request().query(`INSERT INTO replaced_plate (old_plate_id, old_experiment_id, old_name, old_active_stage) SELECT plate_id, experiment_id, name, active_stage FROM plate WHERE plate_id=${plateID}; SELECT SCOPE_IDENTITY() AS last_insert_id`);
+
+    console.log('result', result);
+
+    await pool.request().query(`INSERT INTO replaced_notes (old_notes_id, old_plate_id, old_stage_id, old_note) SELECT notes_id, plate_id, stage_id, note FROM notes WHERE plate_id=${plateID}`);
+    await pool.request().query(`DELETE FROM notes WHERE plate_id=${plateID}`);
+
+    const result2 = await pool.request().query(`SELECT serial_number, last_serial_number FROM experiment WHERE experiment_id=${experimentID}`);
+
+    console.log('result2', result2);
+
+    const incremented = result2.recordset[0].last_serial_number + 1;
+    const newSerialNumber = result2.recordset[0].serial_number.slice(0, -1) + incremented;
+
+    await pool.request().query(`UPDATE plate SET name='${newSerialNumber}', active_stage=1 WHERE plate_id=${plateID}`);
+    await pool.request().query(`UPDATE experiment SET last_serial_number=${incremented} WHERE experiment_id=${experimentID}`);
+
+    return newSerialNumber;
 }
 
 async function viewExperiment(experimentID) {
@@ -208,7 +227,8 @@ async function viewExperiment(experimentID) {
     //
     // I don't know if this is expected behavior from SQL SERVER or if this is a bug.  No time to look into it now.
     // 2018-10-22
-    return await pool.request().query(`SELECT p.plate_id, p.name, p.active_stage, s.name AS stage FROM plate p JOIN stage s ON s.stage_id = p.active_stage WHERE p.experiment_id=${Number(experimentID)}`);
+
+    return await pool.request().query(`SELECT p.plate_id, p.rep, p.name, p.active_stage, s.name AS stage FROM plate p JOIN stage s ON s.stage_id = p.active_stage WHERE p.experiment_id=${Number(experimentID)}`);
 }
 
 module.exports = {

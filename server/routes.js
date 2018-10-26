@@ -60,9 +60,9 @@ module.exports = app => {
         next();
     });
 
-    app.post('/replace/:plateID', async (req, res, next) => {
+    app.post('/replace/:experimentID/:plateID', async (req, res, next) => {
         try {
-            res.send(await db.replacePlate(req.params.plateID * 1, req.body));
+            res.send(await db.replacePlate(req.params.experimentID * 1, req.params.plateID * 1));
             next();
         } catch (err) {
             next(err);
