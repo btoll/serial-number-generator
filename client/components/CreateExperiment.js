@@ -247,15 +247,15 @@ export default class CreateExperiment extends React.Component<{}, State> {
                     </div>
                     <div>
                         <label htmlFor="wellCount">Well Count: </label>
-                        <input
-                            type="number"
+                        <select
                             name="wellCount"
-                            step="1"
-                            min="0"
-                            value={this.state.wellCount}
-                            style={{width: 70}}
                             onChange={this.onChange}
-                        />
+                            value={this.state.wellCount}
+                        >
+                            <option value="">Select a Well Count</option>
+                            <option value="96">96</option>
+                            <option value="384">384</option>
+                        </select>
                     </div>
                     <div>
                         <label></label>

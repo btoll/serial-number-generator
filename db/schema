@@ -57,11 +57,11 @@ CREATE TABLE stage
     name NVARCHAR(20) NOT NULL
 )
 INSERT INTO stage VALUES
-    ('Echo'),
-    ('Food'),
-    ('Organism'),
-    ('Incubate'),
-    ('Imaged');
+    ('Dispensing Drugs'),
+    ('Dispensing Drugs'),
+    ('Dispensing Organism'),
+    ('Incubation'),
+    ('Imaging');
 
 CREATE TABLE plate
 (
