@@ -56,6 +56,15 @@ module.exports = app => {
         }
     });
 
+    app.put('/plate/:plateID', async (req, res, next) => {
+        try {
+            res.send(await db.plate(req.params.plateID, req.body));
+            next();
+        } catch (err) {
+            next(err);
+        }
+    });
+
     app.get('/print-experiment/:experimentID', async (req, res, next) => {
         try {
             res.send(await db.printExperiment(req.params.experimentID));

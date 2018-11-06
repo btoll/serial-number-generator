@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const docx = require('docx');
 const fs = require('fs');
 const sql = require('mssql');
 const env = process.env;
@@ -141,34 +142,57 @@ async function postExperiment(uid, body) {
     return lastInsertID.toString();
 }
 
+async function plate(plateID, body) {
+    const pool = await connect();
+    await pool.request().query(`UPDATE plate SET to_print=${body.value} WHERE plate_id=${plateID}`);
+    return await pool.request().query(`SELECT * FROM plate WHERE experiment_id=${body.experimentID}`);
+}
+
 // TODO: Next two functions should be DRY'd out!
 async function printExperiment(experimentID) {
     const pool = await connect();
     const res = await pool.request().query(`SELECT * FROM plate WHERE experiment_id=${experimentID}`);
-    const writeStream = fs.createWriteStream(`experiments/experiment-id-${experimentID}-x.txt`);
+    const res2 = await pool.request().query(`SELECT plate_count, rep_count FROM experiment WHERE experiment_id=${experimentID}`);
+    const plateCount = res2.recordset[0].plate_count;
+    const repCount = res2.recordset[0].rep_count;
 
+    const doc = new docx.Document();
+    const table = doc.createTable(plateCount * repCount, 7);
     for (let i = 0; i < res.recordset.length; i++) {
-        writeStream.write(
-            `Rep ${res.recordset[i].rep}, ${res.recordset[i].name}\n`
+        [0, 2, 4, 6].forEach(n =>
+            table.getCell(i, n).addContent(new docx.Paragraph(res.recordset[i].name))
         );
     }
 
-    writeStream.end();
+    const packer = new docx.Packer();
+
+    packer.toBuffer(doc).then((buffer) => {
+        fs.writeFileSync(`experiments/experiment_id-${experimentID}-x.docx`, buffer);
+    });
+
     return res;
 }
 
 async function printExperimentSelected(experimentID, selected) {
     const pool = await connect();
     const res = await pool.request().query(`SELECT * FROM plate WHERE experiment_id=${experimentID} AND plate_id IN (${selected.join(',')})`);
-    const writeStream = fs.createWriteStream(`experiments/experiment-id-${experimentID}-selected-x.txt`);
+    const res2 = await pool.request().query(`SELECT plate_count, rep_count FROM experiment WHERE experiment_id=${experimentID}`);
+    const plateCount = res2.recordset[0].plate_count;
+    const repCount = res2.recordset[0].rep_count;
 
+    const doc = new docx.Document();
+    const table = doc.createTable(plateCount * repCount, 7);
     for (let i = 0; i < res.recordset.length; i++) {
-        writeStream.write(
-            `Rep ${res.recordset[i].rep}, ${res.recordset[i].name}\n`
+        [0, 2, 4, 6].forEach(n =>
+            table.getCell(i, n).addContent(new docx.Paragraph(res.recordset[i].name))
         );
     }
 
-    writeStream.end();
+    const packer = new docx.Packer();
+
+    packer.toBuffer(doc).then((buffer) => {
+        fs.writeFileSync(`experiments/experiment_id-${experimentID}-x.docx`, buffer);
+    });
     return res;
 }
 
@@ -190,14 +214,10 @@ async function replacePlate(experimentID, plateID) {
     const pool = await connect();
     const result = await pool.request().query(`INSERT INTO replaced_plate (old_plate_id, old_experiment_id, old_name, old_active_stage) SELECT plate_id, experiment_id, name, active_stage FROM plate WHERE plate_id=${plateID}; SELECT SCOPE_IDENTITY() AS last_insert_id`);
 
-    console.log('result', result);
-
     await pool.request().query(`INSERT INTO replaced_notes (old_notes_id, old_plate_id, old_stage_id, old_note) SELECT notes_id, plate_id, stage_id, note FROM notes WHERE plate_id=${plateID}`);
     await pool.request().query(`DELETE FROM notes WHERE plate_id=${plateID}`);
 
     const result2 = await pool.request().query(`SELECT serial_number, last_serial_number FROM experiment WHERE experiment_id=${experimentID}`);
-
-    console.log('result2', result2);
 
     const incremented = result2.recordset[0].last_serial_number + 1;
     const newSerialNumber = result2.recordset[0].serial_number.slice(0, -1) + incremented;
@@ -222,7 +242,11 @@ async function viewExperiment(experimentID) {
     // I don't know if this is expected behavior from SQL SERVER or if this is a bug.  No time to look into it now.
     // 2018-10-22
 
-    return await pool.request().query(`SELECT p.plate_id, p.rep, p.name, p.active_stage, s.name AS stage FROM plate p JOIN stage s ON s.stage_id = p.active_stage WHERE p.experiment_id=${Number(experimentID)}`);
+    // First, zero out the `to_print` field, which indicates if a plate is slotted to be printed by the UI.  Hopefully
+    // this will be going away soon, but for now I need to keep the UI and the server in sync when a checkbox is
+    // clicked on the ViewExperiment modal view.
+    await pool.request().query(`UPDATE plate SET to_print=0 WHERE experiment_id=${experimentID}`);
+    return await pool.request().query(`SELECT p.plate_id, p.rep, p.name, p.active_stage, s.name AS stage, p.to_print FROM plate p JOIN stage s ON s.stage_id = p.active_stage WHERE p.experiment_id=${Number(experimentID)}`);
 }
 
 module.exports = {
@@ -231,6 +255,7 @@ module.exports = {
     getNotes,
     getStages,
     listExperiments,
+    plate,
     postExperiment,
     putNotes,
     printExperiment,

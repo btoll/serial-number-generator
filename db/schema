@@ -76,6 +76,17 @@ CREATE TABLE plate
         ON UPDATE CASCADE
 )
 
+CREATE TABLE to_print
+(
+    to_print_id INT NOT NULL IDENTITY PRIMARY KEY,
+    experiment_id INT NOT NULL,
+    plates NTEXT DEFAULT '',
+
+    CONSTRAINT FK_EXPERIMENT_TO_PRINT FOREIGN KEY (experiment_id)
+        REFERENCES experiment (experiment_id)
+        ON UPDATE CASCADE
+)
+
 CREATE TABLE replaced_plate
 (
     replaced_plate_id INT NOT NULL IDENTITY PRIMARY KEY,

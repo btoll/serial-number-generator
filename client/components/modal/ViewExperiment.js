@@ -8,6 +8,7 @@ import Notes from './Notes';
 import PrintExperiment from './PrintExperiment';
 import {
     NOTES_ENDPOINT,
+    PLATE_ENDPOINT,
     PRINT_EXPERIMENT_ENDPOINT,
     REPLACE_PLATE_ENDPOINT,
     STAGES_ENDPOINT
@@ -221,8 +222,9 @@ export default class ViewExperiment extends React.Component {
         .catch(console.error);
     }
 
-    toPrint(plateID, e) {
+    toPrint(griddleKey, e) {
         const set = this.state.toPrint;
+        const plateID = this.state.plates[griddleKey].plate_id;
 
         if (!e.currentTarget.checked) {
             set.delete(plateID);
@@ -230,25 +232,24 @@ export default class ViewExperiment extends React.Component {
             set.add(plateID);
         }
 
-//        // Is this a hack?  The only way I could get the checkboxes to display across page views
-//        // was to always update the state for `this.state.plates` since that is the data that
-//        // Griddle is using.
-//        //
-//        // It's a pain to always keep the `this.state.plates` and `this.states.toPrint` collections
-//        // in sync.  Worth revisiting!
-//        const plates = this.state.plates.concat().map(plate => {
-//            if (plate.plate_id === plateID) {
-//                plate.toPrint = set.has(plateID);
-//            }
-//
-//            return plate;
-//        });
-
         this.setState({
-            toPrint: set,
-//            plates
+            toPrint: set
         });
-        this.render();
+
+        axios({
+            url: `${PLATE_ENDPOINT}/${plateID}`,
+            method: 'put',
+            data: {
+                experimentID: this.props.experiment.id,
+                value: set.has(plateID) * 1
+            }
+        })
+        .then(res => {
+            this.setState({
+                plates: res.data.recordset
+            })
+        })
+        .catch(console.error);
     }
 
     render() {
@@ -261,19 +262,18 @@ export default class ViewExperiment extends React.Component {
                     plugins={[plugins.LocalPlugin]}
                     pageProperties={{
                         currentPage: 1,
-                        pageSize: 100
+                        pageSize: 20
                     }}
                 >
                     <RowDefinition>
                         <ColumnDefinition
-                            id="plate_id"
+                            id="to_print"
                             title=" "
                             width={20}
                             customComponent={
-                                ({value}) => {
-                                    /*return <input type="checkbox" checked={this.state.toPrint.has(value)} onChange={this.toPrint.bind(null, value)} />*/
-                                    return <input type="checkbox" onChange={this.toPrint.bind(null, value)} />
-                                    }
+                                ({value, griddleKey}) =>
+                                    <input type="checkbox" checked={value ? true : false} onChange={this.toPrint.bind(null, griddleKey)} />
+                                    /*<input type="checkbox" onChange={this.toPrint.bind(null, value)} />*/
                             }
                         />
                         <ColumnDefinition
