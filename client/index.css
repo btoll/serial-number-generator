@@ -49,6 +49,11 @@ form label {
 table.griddle-table {
     margin-top: 20px;
 }
+.viewExperiment table.griddle-table {
+    display: block;
+    height: 550px;
+    overflow: auto;
+}
 thead.griddle-table-heading {
     background-color: antiquewhite;
 }
@@ -127,18 +132,28 @@ tr.griddle-row td + td {
 }
 .printExperiment {
     padding: 10px 20px 20px;
-    width: 20%;
+    width: 25%;
 }
 .printExperiment h4 {
     background-color: peachpuff;
     border: 1px solid darkgoldenrod;
     padding: 20px;
 }
+.printExperiment li {
+    margin: 6px 0;
+}
 .printExperiment div button {
     margin: 0 4px;
 }
+.printExperiment #plates ul {
+    max-height: 500px;
+    overflow: auto;
+}
 .replacePlate {
     width: 350px;
+}
+.viewExperiment {
+    width: 35%;
 }
 .viewExperiment tr.griddle-row td {
     text-align: center;

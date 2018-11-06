@@ -12,8 +12,6 @@ import {
 } from './config';
 
 type State = {
-    serialNumber: string,
-
     diseases: Array<string>,
     organisms: Array<string>,
 
@@ -34,8 +32,6 @@ export default class CreateExperiment extends React.Component<{}, State> {
         super();
 
         this.state = {
-            serialNumber: '',
-
             diseases: [],
             organisms: [],
 
@@ -46,6 +42,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
             wellCount: 0,
 
             modal: {
+                data: null,
                 show: false,
                 type: null
             },
@@ -56,7 +53,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
         this.onChange = this.onChange.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
-        this.print = this.print.bind(this);
+        this.printExperiment = this.printExperiment.bind(this);
 
         // For aria, should hide underyling dom elements when modal is shown.
         // (For screenreaders.)
@@ -136,8 +133,8 @@ export default class CreateExperiment extends React.Component<{}, State> {
         })
         .then(res => (
             this.setState({
-                serialNumber: res.data,
                 modal: {
+                    data: res.data,
                     show: true,
                     type: 'printExperiment'
                 }
@@ -146,11 +143,9 @@ export default class CreateExperiment extends React.Component<{}, State> {
         .catch(console.log);
     }
 
-    print() {
-        const state = this.state;
-
+    printExperiment() {
         axios({
-            url: `${PRINT_EXPERIMENT_ENDPOINT}/${state.serialNumber}/${state.plateCount}/${state.repCount}`,
+            url: `${PRINT_EXPERIMENT_ENDPOINT}/${this.state.modal.data}`,
             method: 'get'
         })
         .then(res => {
@@ -177,10 +172,9 @@ export default class CreateExperiment extends React.Component<{}, State> {
                         portalClassName={this.state.modal.type}
                     >
                         <>
-                            <h2>Your serial number is:</h2>
-                            <h4>PL-{this.state.serialNumber}-x</h4>
+                            <h2>Your experiment has been created!</h2>
                             <div>
-                                <button onClick={this.print}>Print</button>
+                                <button onClick={this.printExperiment}>Print</button>
                                 <button onClick={this.closeModal}>Close</button>
                             </div>
                         </>
@@ -203,8 +197,9 @@ export default class CreateExperiment extends React.Component<{}, State> {
                             style={{
                                 backgroundColor: "antiquewhite",
                                 borderWidth: 0,
+                                fontWeight: "bold",
                                 padding: 5,
-                                width: 320
+                                width: 750
                             }}
                         />
                     </div>

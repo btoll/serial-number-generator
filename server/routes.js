@@ -20,11 +20,13 @@ module.exports = app => {
 
     app.post('/create-experiment', async (req, res, next) => {
         const arr = db.generateSerialNumber(req.body);
-        const uid = arr.join('');
-        await db.postExperiment(uid, req.body);
 
-        res.send(uid);
-        next();
+        try {
+            res.send(await db.postExperiment(arr.join(''), req.body));
+            next();
+        } catch (err) {
+            next(err);
+        }
     });
 
     app.get('/list-experiments', async (req, res, next) => {
@@ -54,10 +56,22 @@ module.exports = app => {
         }
     });
 
-    app.get('/print-experiment/:serialNumber/:plateCount/:repCount', (req, res, next) => {
-        db.printExperiment(req.params);
-        res.send();
-        next();
+    app.get('/print-experiment/:experimentID', async (req, res, next) => {
+        try {
+            res.send(await db.printExperiment(req.params.experimentID));
+            next();
+        } catch (err) {
+            next(err);
+        }
+    });
+
+    app.post('/print-experiment/:experimentID', async (req, res, next) => {
+        try {
+            res.send(await db.printExperimentSelected(req.params.experimentID, req.body.sort()));
+            next();
+        } catch (err) {
+            next(err);
+        }
     });
 
     app.post('/replace/:experimentID/:plateID', async (req, res, next) => {

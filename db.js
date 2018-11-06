@@ -101,20 +101,6 @@ async function getNotes(plateID) {
 
 }
 
-async function putNotes(plateID, body) {
-    const pool = await connect();
-    const selected = body.selected * 1;
-    const notes = body.notes;
-
-    for (let i = 0; i < 5; i++) {
-//        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${i + 1}`);
-        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${notes[i].stage_id}`);
-    }
-
-    await pool.request().query(`UPDATE plate SET active_stage=${selected} WHERE plate_id=${plateID}`);
-    pool.close();
-}
-
 async function getStages() {
     const pool = await connect();
 
@@ -131,65 +117,73 @@ async function postExperiment(uid, body) {
     const pool = await connect();
     const transaction = new sql.Transaction(pool);
 
-    transaction.begin(err => {
-        // ... error checks
-        const plateCount = body.plateCount * 1;
-        const repCount = body.repCount * 1;
+    const plateCount = body.plateCount * 1;
+    const repCount = body.repCount * 1;
 
-        const request = new sql.Request(transaction);
-        // https://stackoverflow.com/questions/36745952/node-mssql-transaction-insert-returning-the-inserted-id
-        // https://blog.sqlauthority.com/2007/03/25/sql-server-identity-vs-scope_identity-vs-ident_current-retrieve-last-inserted-identity-of-record/
-        request.query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, last_serial_number) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_insert_id`, (err, result) => {
-            // ... error checks
+    // https://stackoverflow.com/questions/36745952/node-mssql-transaction-insert-returning-the-inserted-id
+    // https://blog.sqlauthority.com/2007/03/25/sql-server-identity-vs-scope_identity-vs-ident_current-retrieve-last-inserted-identity-of-record/
+    const res = await pool.request().query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, last_serial_number) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_insert_id`);
 
-            transaction.commit(err => {
-                // ... error checks
-
-                console.log("Transaction committed.");
-
-                let q = `INSERT INTO plate (experiment_id, rep, name, active_stage) VALUES `;
-                let k = 1;
-
-                for (let i = 1; i <= repCount; i++) {
-                    for (let j = 1; j <= plateCount; j++) {
-                        // See links above for how to get the last inserted id.
-                        q += `(${result.recordset[0].last_insert_id}, ${i}, 'PL-${uid}-${k++}', 1),`
-                    }
-                }
-
-                // Removing trailing comma.
-                q = q.slice(0, -1);
-
-                transaction.begin(err => {
-                    const request = new sql.Request(transaction);
-
-                    request.query(q, (err, result) => {
-                        transaction.commit(err => {
-                            console.log("Transaction 2 committed.")
-                        });
-                    });
-                });
-            })
-        })
-    });
-}
-
-function printExperiment(params) {
-    const {serialNumber, plateCount, repCount} = params;
-    const writeStream = fs.createWriteStream(`experiments/PL-${serialNumber}-x.txt`);
-    const base = serialNumber.slice(0, -1);
-
+    const lastInsertID = res.recordset[0].last_insert_id;
+    let q = `INSERT INTO plate (experiment_id, rep, name, active_stage) VALUES `;
     let k = 1;
 
     for (let i = 1; i <= repCount; i++) {
-        writeStream.write(`\nRep ${i}\n------------------\n`);
-
         for (let j = 1; j <= plateCount; j++) {
-            writeStream.write(`PL-${base}-${k++}\n`);
+            // See links above for how to get the last inserted id.
+            q += `(${lastInsertID}, ${i}, 'PL-${uid}-${k++}', 1),`;
         }
     }
 
+    // Removing trailing comma.
+    q = q.slice(0, -1);
+    await pool.request().query(q + '; SELECT SCOPE_IDENTITY() AS last_insert_id');
+    return lastInsertID.toString();
+}
+
+// TODO: Next two functions should be DRY'd out!
+async function printExperiment(experimentID) {
+    const pool = await connect();
+    const res = await pool.request().query(`SELECT * FROM plate WHERE experiment_id=${experimentID}`);
+    const writeStream = fs.createWriteStream(`experiments/experiment-id-${experimentID}-x.txt`);
+
+    for (let i = 0; i < res.recordset.length; i++) {
+        writeStream.write(
+            `Rep ${res.recordset[i].rep}, ${res.recordset[i].name}\n`
+        );
+    }
+
     writeStream.end();
+    return res;
+}
+
+async function printExperimentSelected(experimentID, selected) {
+    const pool = await connect();
+    const res = await pool.request().query(`SELECT * FROM plate WHERE experiment_id=${experimentID} AND plate_id IN (${selected.join(',')})`);
+    const writeStream = fs.createWriteStream(`experiments/experiment-id-${experimentID}-selected-x.txt`);
+
+    for (let i = 0; i < res.recordset.length; i++) {
+        writeStream.write(
+            `Rep ${res.recordset[i].rep}, ${res.recordset[i].name}\n`
+        );
+    }
+
+    writeStream.end();
+    return res;
+}
+
+async function putNotes(plateID, body) {
+    const pool = await connect();
+    const selected = body.selected * 1;
+    const notes = body.notes;
+
+    for (let i = 0; i < 5; i++) {
+//        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${i + 1}`);
+        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${notes[i].stage_id}`);
+    }
+
+    await pool.request().query(`UPDATE plate SET active_stage=${selected} WHERE plate_id=${plateID}`);
+    pool.close();
 }
 
 async function replacePlate(experimentID, plateID) {
@@ -240,6 +234,7 @@ module.exports = {
     postExperiment,
     putNotes,
     printExperiment,
+    printExperimentSelected,
     replacePlate,
     viewExperiment
 };

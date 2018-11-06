@@ -1,12 +1,14 @@
 // @flow
 import React from 'react';
-import Griddle, { plugins, RowDefinition, ColumnDefinition } from 'griddle-react';
+import Griddle, { plugins, ColumnDefinition, RowDefinition } from 'griddle-react';
 import axios from 'axios';
 
 import Modal from '../Modal';
 import Notes from './Notes';
+import PrintExperiment from './PrintExperiment';
 import {
     NOTES_ENDPOINT,
+    PRINT_EXPERIMENT_ENDPOINT,
     REPLACE_PLATE_ENDPOINT,
     STAGES_ENDPOINT
 } from '../config';
@@ -21,15 +23,19 @@ export default class ViewExperiment extends React.Component {
             stages: [],
             notes: [],
             modal: {
+                data: null,
                 show: false,
                 type: null
-            }
+            },
+            toPrint: new Set()
         };
 
         this.closeModal = this.closeModal.bind(this);
         this.closeModal2 = this.closeModal2.bind(this);
+        this.printLabels = this.printLabels.bind(this);
         this.replace = this.replace.bind(this);
         this.replacePlate = this.replacePlate.bind(this);
+        this.toPrint = this.toPrint.bind(this);
         this.showNotes = this.showNotes.bind(this);
     }
 
@@ -70,6 +76,37 @@ export default class ViewExperiment extends React.Component {
         });
     }
 
+    queryModal() {
+        this.setState({
+            selectedPlate: Object.assign(this.props.experiment.plates[rowID]),
+            modal: {
+                show: true,
+                type: 'query'
+            }
+        });
+    }
+
+    printLabels() {
+        axios({
+            url: `${PRINT_EXPERIMENT_ENDPOINT}/${this.props.experiment.id}`,
+            method: 'post',
+            data: Array.from(this.state.toPrint)
+        })
+        .then(res => {
+            this.setState({
+                modal: {
+                    data: res.data.recordset,
+                    show: true,
+                    type: 'printExperiment'
+                }
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            this.closeModal()
+        });
+    }
+
     replace() {
         axios.post(`${REPLACE_PLATE_ENDPOINT}/${this.props.experiment.id}/${this.state.selectedPlate.plate_id}`)
         .then(res => {
@@ -83,24 +120,21 @@ export default class ViewExperiment extends React.Component {
                 return plate;
             });
 
+            const row = document.querySelectorAll('.viewExperiment tbody.griddle-table-body tr')[this.state.selectedPlate.griddleKey]
+            row.querySelector('input[type=checkbox]').checked = true;
+
+            const s = this.state.toPrint;
+            s.add(this.state.selectedPlate.plate_id);
+
             this.setState({
                 plates,
                 modal: {
                     show: false
-                }
+                },
+                toPrint: s
             })
         })
         .catch(console.error);
-    }
-
-    queryModal() {
-        this.setState({
-            selectedPlate: Object.assign(this.props.experiment.plates[rowID]),
-            modal: {
-                show: true,
-                type: 'query'
-            }
-        });
     }
 
     replacePlate(rowID) {
@@ -128,6 +162,21 @@ export default class ViewExperiment extends React.Component {
                             stages={this.state.stages}
                             notes={this.state.notes}
                             onCloseModal={this.closeModal}
+                        />
+                    </Modal>
+                );
+
+            case 'printExperiment':
+                return (
+                    <Modal
+                        className={`${this.state.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.closeModal2}
+                        showModal={this.state.modal.show}
+                        portalClassName={this.state.modal.type}
+                    >
+                        <PrintExperiment
+                            plates={this.state.modal.data}
+                            onCloseModal={this.closeModal2}
                         />
                     </Modal>
                 );
@@ -172,6 +221,36 @@ export default class ViewExperiment extends React.Component {
         .catch(console.error);
     }
 
+    toPrint(plateID, e) {
+        const set = this.state.toPrint;
+
+        if (!e.currentTarget.checked) {
+            set.delete(plateID);
+        } else {
+            set.add(plateID);
+        }
+
+//        // Is this a hack?  The only way I could get the checkboxes to display across page views
+//        // was to always update the state for `this.state.plates` since that is the data that
+//        // Griddle is using.
+//        //
+//        // It's a pain to always keep the `this.state.plates` and `this.states.toPrint` collections
+//        // in sync.  Worth revisiting!
+//        const plates = this.state.plates.concat().map(plate => {
+//            if (plate.plate_id === plateID) {
+//                plate.toPrint = set.has(plateID);
+//            }
+//
+//            return plate;
+//        });
+
+        this.setState({
+            toPrint: set,
+//            plates
+        });
+        this.render();
+    }
+
     render() {
         return (
             <>
@@ -182,10 +261,21 @@ export default class ViewExperiment extends React.Component {
                     plugins={[plugins.LocalPlugin]}
                     pageProperties={{
                         currentPage: 1,
-                        pageSize: 10
+                        pageSize: 100
                     }}
                 >
                     <RowDefinition>
+                        <ColumnDefinition
+                            id="plate_id"
+                            title=" "
+                            width={20}
+                            customComponent={
+                                ({value}) => {
+                                    /*return <input type="checkbox" checked={this.state.toPrint.has(value)} onChange={this.toPrint.bind(null, value)} />*/
+                                    return <input type="checkbox" onChange={this.toPrint.bind(null, value)} />
+                                    }
+                            }
+                        />
                         <ColumnDefinition
                             id="name"
                             title="Plate Name"
@@ -215,6 +305,10 @@ export default class ViewExperiment extends React.Component {
 
                 <div>
                     <button onClick={this.props.onCloseModal}>Close</button>
+                    <button
+                        disabled={!this.state.toPrint.size}
+                        onClick={this.printLabels}
+                    >Print</button>
                 </div>
             </>
         );

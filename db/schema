@@ -8,11 +8,16 @@ CREATE TABLE disease
     name NVARCHAR(100) NOT NULL
 );
 INSERT INTO disease VALUES
-    ('D1'),
-    ('D2'),
-    ('D3'),
-    ('D4'),
-    ('D5');
+    ('N-glycanase deficiency (NGLY1)'),
+    ('Niemann-Pick disease Type A (NPA)'),
+    ('Phosphomannomutase 2 Congenital Disorder of Glycosylation (PMM2-CDG)'),
+    ('Multiple Sulfatase Deficiency (MSD)'),
+    ('GNAO1 - related neurodevelopmental disorder (GNAO1)'),
+    ('Coffin-Lowry Syndrome (RPS6KA3)'),
+    ('Panreatitis (CFTR)'),
+    ('Cori Disease (GSD III)'),
+    ('Sanfilippo Syndrom (MPSIIIA)'),
+    ('Sanfilippo Syndrom (MPSIIIB)');
 
 CREATE TABLE organism
 (
@@ -20,10 +25,10 @@ CREATE TABLE organism
     name NVARCHAR(100) NOT NULL
 );
 INSERT INTO organism VALUES
-    ('Butterfly'),
-    ('Cockroach'),
-    ('Dolphin'),
-    ('Worm');
+    ('Yeast'),
+    ('Cell'),
+    ('Worm'),
+    ('Fly');
 
 CREATE TABLE experiment
 (
