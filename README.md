@@ -35,7 +35,9 @@ If you have trouble starting the application on Windows, you'll need to run the 
 
 ## Starting without Webpack
 
-Grab a development build out of the `dist/dev/` directory and follow these steps:
+### Get the Build
+- Build either by running `make prod` on Unix or `npx webpack` on Windows.
+- Grab the build in the `./dist/dev/` directory.
 
 1. Put `index.html` and `serial_number_generator.js` in the same directory wherever your webserver is serving files.
 2. Start the Express webserver, which will communicate with the backend SQL Server database.  This command can be run in the root project directory (wherever you `git` cloned the project):
