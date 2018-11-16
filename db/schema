@@ -70,6 +70,7 @@ CREATE TABLE plate
     rep INT NOT NULL,
     name NVARCHAR(100) NOT NULL,
     active_stage INT DEFAULT 0,
+    to_print INT DEFAULT 0,
 
     CONSTRAINT FK_EXPERIMENT FOREIGN KEY (experiment_id)
         REFERENCES experiment (experiment_id)
