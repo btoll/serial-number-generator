@@ -40,21 +40,28 @@ async function get(table) {
 function generateSerialNumber(body) {
     const plateCount = body.plateCount * 1;
     const repCount = body.repCount * 1;
+    const mod = 10;
 
     // Our crypto algo will be the following:
-    // 1. Hash the parts of the experiment using SHA256 hash function.
-    // 2. Return a buffer, and we'll use its default view (Uint8Array).
+    // 0. From a buffer of 256 random bytes, mod 10 the first 8 (constrain set to 0-9).
+    // 1. Hash our random bytes buffer along with the named parts of the experiment using SHA256 hash function.
+    // 2. #2 returns a buffer, and we'll use its default view (Uint8Array).
+    // 3. Iterate over the slice and mod 10 so every number returned is again constrained to 0-9 and return 10 bytes.
+    const rand = crypto.randomBytes(256);
+
+    const randomBytes = [];
+    for (let v of rand) {
+        randomBytes.push(v % mod);
+    }
+
     const hash = crypto.createHash('sha256');
-    hash.update(`${body.organism}${body.disease}${body.plateCount}${body.repCount}${body.wellCount}`);
+    // Append 8 random bytes to the beginning of the plate string to avoid hash collisions.
+    hash.update(`${randomBytes.slice(0, 8).join('')}${body.organism}${body.disease}${body.plateCount}${body.repCount}${body.wellCount}`);
     const buf = hash.digest(); // Not specifying an encoding will return a Buffer.
-    // 3. Iterate over the slice and mod 8 so every number returned is constrained from 0-7.
-    // 4. Prepend `PL-` and append `-1` and send.
+
     const a = [];
-
-    // TODO: This is good enough for now, but they won't be unique given the same input!
-
-    for (let v of buf.slice(0, 8)) {
-        a.push(v % 8);
+    for (let v of buf.slice(0, 10)) {
+        a.push(v % mod);
     }
 
     return a;
@@ -166,9 +173,14 @@ async function printExperiment(experimentID) {
 
     const packer = new docx.Packer();
 
+    const filepath = `experiments/experiment_id-${experimentID}-x.docx`;
     packer.toBuffer(doc).then((buffer) => {
-        fs.writeFileSync(`experiments/experiment_id-${experimentID}-x.docx`, buffer);
+        fs.writeFileSync(filepath, buffer);
     });
+
+    // Immediately launch the file in MS Word.
+    const exec = require('child_process').exec;
+    exec(`start ${__dirname}/${filepath}`);
 
     return res;
 }

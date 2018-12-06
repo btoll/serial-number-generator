@@ -174,7 +174,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                         <>
                             <h2>Your experiment has been created!</h2>
                             <div>
-                                <button onClick={this.printExperiment}>Print</button>
+                                <button onClick={this.printExperiment}>Save and View in MS Word</button>
                                 <button onClick={this.closeModal}>Close</button>
                             </div>
                         </>
