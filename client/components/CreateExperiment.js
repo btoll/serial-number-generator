@@ -150,15 +150,19 @@ export default class CreateExperiment extends React.Component<{}, State> {
         })
         .then(res => {
             this.closeModal();
+
+            this.setState({
+                modal: {
+                    data: res.data,
+                    show: true,
+                    type: 'showFilepath'
+                }
+            });
         })
         .catch(err => {
             console.log(err);
             this.closeModal()
         });
-    }
-
-    printDisplayName() {
-        return `PL-${this.getExperimentName()}-xxxxxxx-1`;
     }
 
     showModal() {
@@ -174,9 +178,25 @@ export default class CreateExperiment extends React.Component<{}, State> {
                         <>
                             <h2>Your experiment has been created!</h2>
                             <div>
-                                <button onClick={this.printExperiment}>Save and View in MS Word</button>
+                                <button onClick={this.printExperiment}>Print</button>
                                 <button onClick={this.closeModal}>Close</button>
                             </div>
+                        </>
+                    </Modal>
+
+                );
+            case 'showFilepath':
+                return (
+                    <Modal
+                        className={`${this.state.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.closeModal}
+                        showModal={this.state.modal.show}
+                        portalClassName={this.state.modal.type}
+                    >
+                        <>
+                            <h2>Your experiment has been saved to:</h2>
+                            <p>{this.state.modal.data}</p>
+                            <button onClick={this.closeModal}>Close</button>
                         </>
                     </Modal>
 
@@ -193,7 +213,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                         <input
                             type="text"
                             readOnly={true}
-                            value={this.printDisplayName()}
+                            value={this.getExperimentName()}
                             style={{
                                 backgroundColor: "antiquewhite",
                                 borderWidth: 0,

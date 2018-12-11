@@ -1,6 +1,7 @@
 // @flow
 const PROTOCOL = 'http://';
 const HOST = 'em.perlara.com';
+//const HOST = 'localhost';
 const PORT = '3000';
 
 const SOCKET = `${PROTOCOL}${HOST}:${PORT}`;

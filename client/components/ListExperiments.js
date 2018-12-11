@@ -157,7 +157,15 @@ export default class ListExperiments extends React.Component<{}, {}> {
                                     <a href={`#`} onClick={this.viewExperiment.bind(this, value)}>{value}</a>
                             }
                         />
-                        <ColumnDefinition id="serial_number" title="Serial Number" width={250} />
+                        <ColumnDefinition
+                            id="id"
+                            title="Experiment ID"
+                            width={250}
+                            customComponent={
+                                ({value}) =>
+                                    `EXP${String(value).padStart(10, 0)}`
+                            }
+                        />
                         <ColumnDefinition id="organism" title="Organism" width={200} />
                         <ColumnDefinition id="disease" title="Disease" width={200} />
                         <ColumnDefinition id="plate_count" title="Plate Count" width={100} />

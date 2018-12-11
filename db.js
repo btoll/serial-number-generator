@@ -55,8 +55,8 @@ function generateSerialNumber(body) {
     }
 
     const hash = crypto.createHash('sha256');
-    // Append 8 random bytes to the beginning of the plate string to avoid hash collisions.
-    hash.update(`${randomBytes.slice(0, 8).join('')}${body.organism}${body.disease}${body.plateCount}${body.repCount}${body.wellCount}`);
+    // Append 16 random bytes to the beginning of the plate string to avoid hash collisions.
+    hash.update(`${randomBytes.slice(0, 16).join('')}${body.organism}${body.disease}${body.plateCount}${body.repCount}${body.wellCount}`);
     const buf = hash.digest(); // Not specifying an encoding will return a Buffer.
 
     const a = [];
@@ -118,7 +118,16 @@ async function getStages() {
 async function listExperiments() {
     const pool = await connect();
 
-    return await pool.request().query(`SELECT e.experiment_id, e.experiment_name, e.serial_number, o.name AS organism, d.name AS disease, e.plate_count, e.rep_count, e.well_count FROM experiment e JOIN organism o ON o.organism_id = e.organism_id JOIN disease d ON d.disease_id = e.disease_id`);
+    // I had to add `e.experiment_id AS id` b/c Griddle (react grid component) needs to have a unique ID per column.
+    // This is kind of a kludge.
+    // https://infinitcore.atlassian.net/browse/PI-38
+    return await pool.request().query(`SELECT e.experiment_id AS id, e.experiment_id, e.experiment_name, e.serial_number, o.name AS organism, d.name AS disease, e.plate_count, e.rep_count, e.well_count FROM experiment e JOIN organism o ON o.organism_id = e.organism_id JOIN disease d ON d.disease_id = e.disease_id`);
+}
+
+async function plate(plateID, body) {
+    const pool = await connect();
+    await pool.request().query(`UPDATE plate SET to_print=${body.value} WHERE plate_id=${plateID}`);
+    return await pool.request().query(`SELECT * FROM plate WHERE experiment_id=${body.experimentID}`);
 }
 
 async function postExperiment(uid, body) {
@@ -130,29 +139,24 @@ async function postExperiment(uid, body) {
 
     // https://stackoverflow.com/questions/36745952/node-mssql-transaction-insert-returning-the-inserted-id
     // https://blog.sqlauthority.com/2007/03/25/sql-server-identity-vs-scope_identity-vs-ident_current-retrieve-last-inserted-identity-of-record/
-    const res = await pool.request().query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, last_serial_number) VALUES ('${body.experimentName}-${uid}', 'PL-${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_insert_id`);
+//    const res = await pool.request().query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, last_plate_number) VALUES ('${body.experimentName}-${uid}', '${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_experiment_id`);
+    const res = await pool.request().query(`INSERT INTO experiment (experiment_name, serial_number, organism_id, disease_id, plate_count, rep_count, well_count, last_plate_number) VALUES ('${body.experimentName}', '${uid}-x', ${Number(body.organism)}, ${Number(body.disease)}, ${plateCount}, ${repCount}, ${Number(body.wellCount)}, ${plateCount * repCount}); SELECT SCOPE_IDENTITY() AS last_experiment_id`);
 
-    const lastInsertID = res.recordset[0].last_insert_id;
+    const lastInsertID = res.recordset[0].last_experiment_id;
     let q = `INSERT INTO plate (experiment_id, rep, name, active_stage) VALUES `;
     let k = 1;
 
     for (let i = 1; i <= repCount; i++) {
         for (let j = 1; j <= plateCount; j++) {
             // See links above for how to get the last inserted id.
-            q += `(${lastInsertID}, ${i}, 'PL-${uid}-${k++}', 1),`;
+            q += `(${lastInsertID}, ${i}, '${uid}-${k++}', 1),`;
         }
     }
 
     // Removing trailing comma.
     q = q.slice(0, -1);
-    await pool.request().query(q + '; SELECT SCOPE_IDENTITY() AS last_insert_id');
+    await pool.request().query(q + '; SELECT SCOPE_IDENTITY() AS last_experiment_id');
     return lastInsertID.toString();
-}
-
-async function plate(plateID, body) {
-    const pool = await connect();
-    await pool.request().query(`UPDATE plate SET to_print=${body.value} WHERE plate_id=${plateID}`);
-    return await pool.request().query(`SELECT * FROM plate WHERE experiment_id=${body.experimentID}`);
 }
 
 // TODO: Next two functions should be DRY'd out!
@@ -172,17 +176,17 @@ async function printExperiment(experimentID) {
     }
 
     const packer = new docx.Packer();
+    const filepath = `${__dirname}/experiments/experiment_id-${experimentID.padStart(10, 0)}.docx`;
 
-    const filepath = `experiments/experiment_id-${experimentID}-x.docx`;
     packer.toBuffer(doc).then((buffer) => {
         fs.writeFileSync(filepath, buffer);
     });
 
     // Immediately launch the file in MS Word.
-    const exec = require('child_process').exec;
-    exec(`start ${__dirname}/${filepath}`);
+//    const exec = require('child_process').exec;
+//    exec(`start ${filepath}`);
 
-    return res;
+    return filepath;
 }
 
 async function printExperimentSelected(experimentID, selected) {
@@ -201,10 +205,12 @@ async function printExperimentSelected(experimentID, selected) {
     }
 
     const packer = new docx.Packer();
+    const filepath = `${__dirname}/experiments/experiment_id-${experimentID.padStart(10, 0)}.docx`;
 
     packer.toBuffer(doc).then((buffer) => {
-        fs.writeFileSync(`experiments/experiment_id-${experimentID}-x.docx`, buffer);
+        fs.writeFileSync(filepath, buffer);
     });
+
     return res;
 }
 
@@ -214,7 +220,6 @@ async function putNotes(plateID, body) {
     const notes = body.notes;
 
     for (let i = 0; i < 5; i++) {
-//        await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${i + 1}`);
         await pool.request().query(`UPDATE notes SET note='${notes[i].note}' WHERE plate_id=${plateID} AND stage_id=${notes[i].stage_id}`);
     }
 
@@ -229,13 +234,13 @@ async function replacePlate(experimentID, plateID) {
     await pool.request().query(`INSERT INTO replaced_notes (old_notes_id, old_plate_id, old_stage_id, old_note) SELECT notes_id, plate_id, stage_id, note FROM notes WHERE plate_id=${plateID}`);
     await pool.request().query(`DELETE FROM notes WHERE plate_id=${plateID}`);
 
-    const result2 = await pool.request().query(`SELECT serial_number, last_serial_number FROM experiment WHERE experiment_id=${experimentID}`);
+    const result2 = await pool.request().query(`SELECT serial_number, last_plate_number FROM experiment WHERE experiment_id=${experimentID}`);
 
-    const incremented = result2.recordset[0].last_serial_number + 1;
+    const incremented = result2.recordset[0].last_plate_number + 1;
     const newSerialNumber = result2.recordset[0].serial_number.slice(0, -1) + incremented;
 
     await pool.request().query(`UPDATE plate SET name='${newSerialNumber}', active_stage=1 WHERE plate_id=${plateID}`);
-    await pool.request().query(`UPDATE experiment SET last_serial_number=${incremented} WHERE experiment_id=${experimentID}`);
+    await pool.request().query(`UPDATE experiment SET last_plate_number=${incremented} WHERE experiment_id=${experimentID}`);
 
     return newSerialNumber;
 }
@@ -247,7 +252,7 @@ async function viewExperiment(experimentID) {
     // as an array, i.e.:
     //
     //          {
-    //              name: ["Rep 1 PL-21612424-1", "pre"],
+    //              name: ["Rep 1 21612424-1", "pre"],
     //              notes: ""
     //          }
     //

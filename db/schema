@@ -40,7 +40,7 @@ CREATE TABLE experiment
     plate_count INT DEFAULT 0,
     rep_count INT DEFAULT 0,
     well_count INT DEFAULT 0,
-    last_serial_number INT NOT NULL,
+    last_plate_number INT NOT NULL,
 
     CONSTRAINT FK_ORGANISM FOREIGN KEY (organism_id)
         REFERENCES organism (organism_id)
