@@ -1,11 +1,12 @@
 const db = require('../db');
+const fs = require('fs');
 
 module.exports = app => {
     // For CORS.
     app.use((req, res, next) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, AuthorizationToken");
-        res.header("Access-Control-Allow-Methods", "GET,HEAD,POST,PUT");
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Content-Length, Content-Disposition, Accept, AuthorizationToken');
+        res.header('Access-Control-Allow-Methods', 'GET,HEAD,POST,PUT');
         next();
     });
 
@@ -67,7 +68,10 @@ module.exports = app => {
 
     app.get('/print-experiment/:experimentID', async (req, res, next) => {
         try {
-            res.send(await db.printExperiment(req.params.experimentID));
+            const filename = await db.printExperiment(req.params.experimentID);
+//            res.setHeader('Content-Type', 'application/octet-stream');
+//            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.send(filename);
             next();
         } catch (err) {
             next(err);

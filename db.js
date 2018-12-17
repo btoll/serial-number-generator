@@ -176,7 +176,8 @@ async function printExperiment(experimentID) {
     }
 
     const packer = new docx.Packer();
-    const filepath = `${__dirname}/experiments/experiment_id-${experimentID.padStart(10, 0)}.docx`;
+    const filename = `experiment_id-${experimentID.padStart(10, 0)}.docx`;
+    const filepath = `${__dirname}/experiments/${filename}`;
 
     packer.toBuffer(doc).then((buffer) => {
         fs.writeFileSync(filepath, buffer);
@@ -186,7 +187,7 @@ async function printExperiment(experimentID) {
 //    const exec = require('child_process').exec;
 //    exec(`start ${filepath}`);
 
-    return filepath;
+    return filename;
 }
 
 async function printExperimentSelected(experimentID, selected) {

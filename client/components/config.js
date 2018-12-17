@@ -3,6 +3,8 @@ const PROTOCOL = 'http://';
 const HOST = 'em.perlara.com';
 //const HOST = 'localhost';
 const PORT = '3000';
+//const DOWNLOAD_PORT = '8080';
+const DOWNLOAD_PATH = `${HOST}:80`;
 
 const SOCKET = `${PROTOCOL}${HOST}:${PORT}`;
 //const AUTH = `${SOCKET}/api/users/login`;
@@ -29,6 +31,7 @@ const incr = (i =>
 )(incrementer());
 
 export {
+    DOWNLOAD_PATH,
     CREATE_EXPERIMENT_ENDPOINT,
     LIST_EXPERIMENTS_ENDPOINT,
     LOGIN_ENDPOINT,

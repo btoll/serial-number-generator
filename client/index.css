@@ -100,6 +100,15 @@ tr.griddle-row td + td {
 .ReactModal__Content--before-close {
     opacity: 0;
 }
+.download {
+    padding: 10px 20px 20px;
+    width: 25%;
+}
+.download a {
+    display: block;
+    margin: 10px 0;
+    text-decoration: none;
+}
 #stages {
     padding: 0;
     margin: 0;

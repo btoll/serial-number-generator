@@ -7,6 +7,7 @@ import Error from './Error';
 import List from './List';
 import Modal from './Modal';
 import {
+    DOWNLOAD_PATH,
     CREATE_EXPERIMENT_ENDPOINT,
     PRINT_EXPERIMENT_ENDPOINT,
 } from './config';
@@ -23,6 +24,9 @@ type State = {
 
     errors: Array<string>
 };
+
+const returnDownloadPath = filename =>
+    `http://${DOWNLOAD_PATH}/experiments/${filename}`;
 
 export default class CreateExperiment extends React.Component<{}, State> {
     onChange: Function;
@@ -155,7 +159,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                 modal: {
                     data: res.data,
                     show: true,
-                    type: 'showFilepath'
+                    type: 'download'
                 }
             });
         })
@@ -167,6 +171,22 @@ export default class CreateExperiment extends React.Component<{}, State> {
 
     showModal() {
         switch (this.state.modal.type) {
+            case 'download':
+                return (
+                    <Modal
+                        className={`${this.state.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.closeModal}
+                        showModal={this.state.modal.show}
+                        portalClassName={this.state.modal.type}
+                    >
+                        <>
+                            <a href={returnDownloadPath(this.state.modal.data)} download={this.state.modal.data}>Download {this.state.modal.data}</a>
+                            <button onClick={this.closeModal}>Close</button>
+                        </>
+                    </Modal>
+
+                );
+
             case 'printExperiment':
                 return (
                     <Modal
@@ -181,22 +201,6 @@ export default class CreateExperiment extends React.Component<{}, State> {
                                 <button onClick={this.printExperiment}>Print</button>
                                 <button onClick={this.closeModal}>Close</button>
                             </div>
-                        </>
-                    </Modal>
-
-                );
-            case 'showFilepath':
-                return (
-                    <Modal
-                        className={`${this.state.modal.type} ReactModal__Content__base`}
-                        onCloseModal={this.closeModal}
-                        showModal={this.state.modal.show}
-                        portalClassName={this.state.modal.type}
-                    >
-                        <>
-                            <h2>Your experiment has been saved to:</h2>
-                            <p>{this.state.modal.data}</p>
-                            <button onClick={this.closeModal}>Close</button>
                         </>
                     </Modal>
 
