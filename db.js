@@ -183,11 +183,10 @@ async function printExperiment(experimentID) {
         fs.writeFileSync(filepath, buffer);
     });
 
-    // Immediately launch the file in MS Word.
-//    const exec = require('child_process').exec;
-//    exec(`start ${filepath}`);
-
-    return filename;
+    return {
+        filename,
+        plates: res
+    };
 }
 
 async function printExperimentSelected(experimentID, selected) {
@@ -206,13 +205,17 @@ async function printExperimentSelected(experimentID, selected) {
     }
 
     const packer = new docx.Packer();
-    const filepath = `${__dirname}/experiments/experiment_id-${experimentID.padStart(10, 0)}.docx`;
+    const filename = `experiment_id-${experimentID.padStart(10, 0)}.docx`;
+    const filepath = `${__dirname}/experiments/${filename}`;
 
     packer.toBuffer(doc).then((buffer) => {
         fs.writeFileSync(filepath, buffer);
     });
 
-    return res;
+    return {
+        filename,
+        plates: res
+    };
 }
 
 async function putNotes(plateID, body) {

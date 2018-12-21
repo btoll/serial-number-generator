@@ -68,19 +68,28 @@ module.exports = app => {
 
     app.get('/print-experiment/:experimentID', async (req, res, next) => {
         try {
-            const filename = await db.printExperiment(req.params.experimentID);
-//            res.setHeader('Content-Type', 'application/octet-stream');
-//            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.send(filename);
+            const { filename, plates } = await db.printExperiment(req.params.experimentID);
+
+            res.send({
+                filename,
+                plates
+            });
+
             next();
         } catch (err) {
             next(err);
         }
     });
 
-    app.post('/print-experiment/:experimentID', async (req, res, next) => {
+    app.put('/print-experiment/:experimentID', async (req, res, next) => {
         try {
-            res.send(await db.printExperimentSelected(req.params.experimentID, req.body.sort()));
+            const { filename, plates } = await db.printExperimentSelected(req.params.experimentID, req.body.sort());
+
+            res.send({
+                filename,
+                plates
+            });
+
             next();
         } catch (err) {
             next(err);

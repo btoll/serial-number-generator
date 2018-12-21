@@ -46,7 +46,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
             wellCount: 0,
 
             modal: {
-                data: null,
+                data: {},
                 show: false,
                 type: null
             },
@@ -157,7 +157,9 @@ export default class CreateExperiment extends React.Component<{}, State> {
 
             this.setState({
                 modal: {
-                    data: res.data,
+                    data: {
+                        filename: res.data.filename
+                    },
                     show: true,
                     type: 'download'
                 }
@@ -180,7 +182,7 @@ export default class CreateExperiment extends React.Component<{}, State> {
                         portalClassName={this.state.modal.type}
                     >
                         <>
-                            <a href={returnDownloadPath(this.state.modal.data)} download={this.state.modal.data}>Download {this.state.modal.data}</a>
+                            <a href={returnDownloadPath(this.state.modal.data.filename)} download={this.state.modal.data.filename}>Download {this.state.modal.data.filename}</a>
                             <button onClick={this.closeModal}>Close</button>
                         </>
                     </Modal>

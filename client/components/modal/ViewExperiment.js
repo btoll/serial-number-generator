@@ -90,13 +90,16 @@ export default class ViewExperiment extends React.Component {
     printLabels() {
         axios({
             url: `${PRINT_EXPERIMENT_ENDPOINT}/${this.props.experiment.id}`,
-            method: 'post',
+            method: 'put',
             data: Array.from(this.state.toPrint)
         })
         .then(res => {
             this.setState({
                 modal: {
-                    data: res.data.recordset,
+                    data: {
+                        filename: res.data.filename,
+                        plates: res.data.plates.recordset
+                    },
                     show: true,
                     type: 'printExperiment'
                 }
@@ -176,7 +179,8 @@ export default class ViewExperiment extends React.Component {
                         portalClassName={this.state.modal.type}
                     >
                         <PrintExperiment
-                            plates={this.state.modal.data}
+                            filename={this.state.modal.data.filename}
+                            plates={this.state.modal.data.plates}
                             onCloseModal={this.closeModal2}
                         />
                     </Modal>

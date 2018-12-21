@@ -2,31 +2,32 @@
 import React from 'react';
 import axios from 'axios';
 
-export default class PrintExperiment extends React.Component {
-    constructor(props) {
-        super(props);
-    }
+import { DOWNLOAD_PATH } from '../config';
 
-    render() {
-        return (
-            <>
-                <div>
-                    <button onClick={this.props.onCloseModal}>Close</button>
-                </div>
+const returnDownloadPath = filename =>
+    `http://${DOWNLOAD_PATH}/experiments/${filename}`;
 
-                <div id="plates">
-                    <h4>Printed the following active plates:</h4>
+export default function PrintExperiment(props) {
+    return (
+        <>
+            <div>
+                <button onClick={props.onCloseModal}>Close</button>
+            </div>
 
-                    <ul>
-                    {
-                        this.props.plates.map(plate =>
-                            <li key={plate.plate_id}>{plate.name}</li>
-                        )
-                    }
-                    </ul>
-                </div>
-            </>
-        );
-    }
+            <div id="plates">
+                <h4>Active plates:</h4>
+
+                <ul>
+                {
+                    props.plates.map(plate =>
+                        <li key={plate.plate_id}>{plate.name}</li>
+                    )
+                }
+                </ul>
+            </div>
+
+            <a href={returnDownloadPath(props.filename)} download={props.filename}>Download {props.filename}</a>
+        </>
+    );
 }
 
