@@ -8,6 +8,10 @@
 
 Note that if you get any warnings about vulnerabilities, you can choose to fix them or not.  Either way the app will run.
 
+### Creating the Download Folder
+
+From the top-level of the project directory, create an `experiments` directory.  This is where the runtime will place created experiments that are then available for download.
+
 ### SQL Server Database
 
 You'll find the database schema in `db/schema`.  Assuming that SQL Server is already installed and running on the machine, you can import by issuing the following command in the same directory:
@@ -31,7 +35,14 @@ Note that this backgrounds the Node process.  All logging to `stdout` is from [w
 If you have trouble starting the application on Windows, you'll need to run the commands manually from the root of the project directory:
 
     node ./server/app.js &
-	./node_modules/.bin/webpack-dev-server --open
+
+    Running with webpack as a server:
+        npx webpack-dev-server --open
+
+    Running with a pre-built file (also, see the section below, `Starting without Webpack`):
+        npx webpack
+
+    This creates a `dist` directory from which you'll copy the `serial_number_generator` script to your node server.
 
 ## Starting without Webpack
 
@@ -64,7 +75,7 @@ To do this, simply run:
 
 ## Environment Variables
 
-This project uses the [dotenv] module to load all environment variables needed by the runtime.  This file is called `.env` and is located in the root of the project.
+This project uses the [dotenv] module to load all environment variables needed by the runtime and the SQL Server database.  This file is called `.env` and is located in the root of the project.
 
 ## Misc
 

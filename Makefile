@@ -32,4 +32,5 @@ start-ui:
 	./node_modules/.bin/webpack-dev-server --open
 
 serve: start-server start-ui
+	mkdir experiments/ &> /dev/null
 
