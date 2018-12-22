@@ -12,6 +12,20 @@ Note that if you get any warnings about vulnerabilities, you can choose to fix t
 
 From the top-level of the project directory, create an `experiments` directory.  This is where the runtime will place created experiments that are then available for download.
 
+If you change the location from the default location of `PROJECT_ROOT/experiments/`, then you must tell the runtime where it is when launching node.  For example,
+
+    DOWNLOAD_DIR=./dist/dev/ node ./server/app.js
+
+This tells the runtime to download the files into `PROJECT_ROOT/dist/dev/experiments`.
+
+In additions, you **must** also change the location of the download directory in the front-end code in `./client/component/config.js`.  For example, continuing with the same location from the above example:
+
+    const DOWNLOAD_PATH = `${HOST}:${DOWNLOAD_PORT}`;
+
+Should be changed to:
+
+    const DOWNLOAD_PATH = `${HOST}:${DOWNLOAD_PORT}/dist/dev`;
+
 ### SQL Server Database
 
 You'll find the database schema in `db/schema`.  Assuming that SQL Server is already installed and running on the machine, you can import by issuing the following command in the same directory:
@@ -75,7 +89,7 @@ To do this, simply run:
 
 ## Environment Variables
 
-This project uses the [dotenv] module to load all environment variables needed by the runtime and the SQL Server database.  This file is called `.env` and is located in the root of the project.
+This project uses the [dotenv] module to load all environment variables needed by the runtime for the `SQL Server` database.  This file is called `.env` and is located in the root of the project.
 
 ## Misc
 

@@ -177,7 +177,7 @@ async function printExperiment(experimentID) {
 
     const packer = new docx.Packer();
     const filename = `experiment_id-${experimentID.padStart(10, 0)}.docx`;
-    const filepath = `${__dirname}/experiments/${filename}`;
+    const filepath = `${env.DOWNLOAD_DIR || __dirname}/experiments/${filename}`;
 
     packer.toBuffer(doc).then((buffer) => {
         fs.writeFileSync(filepath, buffer);
@@ -206,7 +206,7 @@ async function printExperimentSelected(experimentID, selected) {
 
     const packer = new docx.Packer();
     const filename = `experiment_id-${experimentID.padStart(10, 0)}.docx`;
-    const filepath = `${__dirname}/experiments/${filename}`;
+    const filepath = `${env.DOWNLOAD_DIR || __dirname}/experiments/${filename}`;
 
     packer.toBuffer(doc).then((buffer) => {
         fs.writeFileSync(filepath, buffer);
