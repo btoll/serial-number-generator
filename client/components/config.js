@@ -1,10 +1,10 @@
 // @flow
 const PROTOCOL = 'http://';
-const HOST = 'em.perlara.com';
-//const HOST = 'localhost';
+//const HOST = 'em.perlara.com';
+const HOST = 'localhost';
 const PORT = '3000';
-//const DOWNLOAD_PORT = '8080';
-const DOWNLOAD_PATH = `${HOST}:80`;
+const DOWNLOAD_PORT = '8080';
+const DOWNLOAD_PATH = `${HOST}:${DOWNLOAD_PORT}`;
 
 const SOCKET = `${PROTOCOL}${HOST}:${PORT}`;
 //const AUTH = `${SOCKET}/api/users/login`;

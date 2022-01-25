@@ -1,4 +1,4 @@
-     CC = node
+	 CC = node --inspect=0.0.0.0:9229
     SNG = corelyticsbftapi.azurewebsites.net
  CONFIG = ./client/components/config.js
 DEVPORT = 3001
